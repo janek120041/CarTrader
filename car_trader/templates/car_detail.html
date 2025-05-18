@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="car-detail-page">
+    <div class="car-image">
+        <img src="{{ car.image_url }}" alt="{{ car.make }} {{ car.model }}">
+    </div>
+    <div class="car-details">
+        <h2>{{ car.year }} {{ car.make }} {{ car.model }}</h2>
+        <ul>
+            <li><strong>Year:</strong> {{ car.year }}</li>
+            <li><strong>Make:</strong> {{ car.make }}</li>
+            <li><strong>Model:</strong> {{ car.model }}</li>
+            <li><strong>Description:</strong> {{ car.description }}</li>
+            <li><strong>Owner:</strong> {{ car.owner.username }}</li>
+        </ul>
+        <a href="#" class="btn">Propose Trade</a>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="login-page">
+    <div class="login-box">
+        <form>
+            <input type="email" placeholder="Email">
+            <input type="password" placeholder="Password">
+            <div class="remember-forgot">
+                <label><input type="checkbox"> Remember Me</label>
+                <a href="#">Forgot password?</a>
+            </div>
+            <button type="submit" class="btn">Sign In</button>
+        </form>
+        <div class="register-link">
+            New to our platform? <a href="{{ url_for('auth.register') }}">Create an account</a>
+        </div>
+        <div class="social-login">
+            <button class="btn-social">F</button>
+            <button class="btn-social">G</button>
+        </div>
+    </div>
+</div>
+{% endblock %} 

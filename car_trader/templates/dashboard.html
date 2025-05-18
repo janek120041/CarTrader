@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="dashboard">
+    <h2>My Cars</h2>
+    <div class="my-cars">
+        {% for car in my_cars %}
+        <div class="my-car-card">
+            <img src="{{ car.image_url }}" alt="{{ car.make }} {{ car.model }}">
+            <div>
+                <h3>{{ car.make }} {{ car.model }}</h3>
+                <p>{{ car.year }}</p>
+                <p>{{ car.mileage }} miles</p>
+                <p>{{ car.location }}</p>
+            </div>
+        </div>
+        {% endfor %}
+        <a href="#" class="view-all">View All</a>
+    </div>
+    <div class="dashboard-side">
+        <div class="dashboard-box">
+            <h3>My Trade Requests</h3>
+            <a href="{{ url_for('main.trade_requests') }}" class="view-all">View All</a>
+        </div>
+        <div class="dashboard-box">
+            <h3>My Messages</h3>
+            <a href="#" class="view-all">View All</a>
+        </div>
+    </div>
+</div>
+{% endblock %} 
