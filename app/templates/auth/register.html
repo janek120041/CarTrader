@@ -1,35 +1,66 @@
 {% extends "base.html" %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Register - CarTrader{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
+<div class="row justify-content-center my-5">
     <div class="col-md-6 col-lg-4">
-        <div class="card">
-            <div class="card-body">
-                <h2 class="text-center mb-4">Register</h2>
-                <form method="POST">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <h2 class="text-center mb-4">Create Account</h2>
+                <p class="text-center text-muted mb-4">Join our community today</p>
+                
+                <form method="POST" id="registerForm">
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="username" name="username" required placeholder="Choose a username">
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Email address</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                            <input type="email" class="form-control" id="email" name="email" required placeholder="Enter your email">
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                        <div class="form-text">Password must be at least 8 characters long.</div>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="password" name="password" required placeholder="Create a password">
+                        </div>
+                        <div class="progress mt-2" style="height: 5px;">
+                            <div class="progress-bar" id="password-strength" role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <div class="form-text mt-2">
+                            Password requirements:
+                            <ul class="mb-0">
+                                <li>At least 8 characters long</li>
+                                <li>Contains uppercase & lowercase letters</li>
+                                <li>Contains numbers</li>
+                                <li>Contains special characters</li>
+                            </ul>
+                        </div>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label for="confirm_password" class="form-label">Confirm Password</label>
-                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required placeholder="Confirm your password">
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">Register</button>
+                    <button type="submit" class="btn btn-primary w-100 mb-3">
+                        <i class="fas fa-user-plus me-2"></i>Create Account
+                    </button>
                 </form>
-                <div class="text-center mt-3">
-                    <p>Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a></p>
+                
+                <div class="text-center mt-4">
+                    <p class="mb-0">Already have an account?</p>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary mt-2">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login here
+                    </a>
                 </div>
             </div>
         </div>
@@ -38,18 +69,58 @@
 
 {% block extra_js %}
 <script>
-document.querySelector('form').addEventListener('submit', function(e) {
-    var password = document.getElementById('password').value;
-    var confirm = document.getElementById('confirm_password').value;
+document.getElementById('password').addEventListener('input', function() {
+    const password = this.value;
+    let strength = 0;
+    
+    // Length check
+    if (password.length >= 8) strength += 25;
+    
+    // Uppercase check
+    if (/[A-Z]/.test(password)) strength += 25;
+    
+    // Lowercase check
+    if (/[a-z]/.test(password)) strength += 25;
+    
+    // Number check
+    if (/[0-9]/.test(password)) strength += 12.5;
+    
+    // Special character check
+    if (/[^A-Za-z0-9]/.test(password)) strength += 12.5;
+    
+    const strengthBar = document.getElementById('password-strength');
+    strengthBar.style.width = strength + '%';
+    
+    // Update color based on strength
+    if (strength < 50) {
+        strengthBar.className = 'progress-bar bg-danger';
+    } else if (strength < 75) {
+        strengthBar.className = 'progress-bar bg-warning';
+    } else {
+        strengthBar.className = 'progress-bar bg-success';
+    }
+});
+
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm_password').value;
     
     if (password !== confirm) {
         e.preventDefault();
         alert('Passwords do not match!');
+        return;
     }
     
     if (password.length < 8) {
         e.preventDefault();
         alert('Password must be at least 8 characters long!');
+        return;
+    }
+    
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
+        e.preventDefault();
+        alert('Password must contain uppercase & lowercase letters, numbers, and special characters!');
+        return;
     }
 });
 </script>
