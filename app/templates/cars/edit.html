@@ -1,84 +1,242 @@
 {% extends "base.html" %}
 
-{% block title %}Edit Car Listing{% endblock %}
+{% block title %}Edit Car Listing - CarTrader{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
+<div class="row justify-content-center my-5">
     <div class="col-md-8">
-        <div class="card">
-            <div class="card-body">
+        <div class="card shadow">
+            <div class="card-body p-4">
                 <h2 class="card-title text-center mb-4">Edit Car Listing</h2>
                 
                 {% if car.image_url %}
                 <div class="text-center mb-4">
-                    <img src="{{ url_for('static', filename=car.image_url) }}" alt="{{ car.title }}" class="img-fluid rounded" style="max-height: 300px;">
+                    <div class="position-relative d-inline-block">
+                        <img src="{{ url_for('static', filename=car.image_url) }}" alt="{{ car.title }}" class="img-fluid rounded" style="max-height: 300px;">
+                        <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2" onclick="removeImage()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
                 {% endif %}
 
-                <form method="POST" enctype="multipart/form-data">
+                <form method="POST" enctype="multipart/form-data" id="editCarForm">
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <label for="title" class="form-label">Listing Title</label>
-                            <input type="text" class="form-control" id="title" name="title" value="{{ car.title }}" required>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-heading"></i></span>
+                                <input type="text" class="form-control" id="title" name="title" value="{{ car.title }}" required>
+                            </div>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-4">
                             <label for="make" class="form-label">Make</label>
-                            <input type="text" class="form-control" id="make" name="make" value="{{ car.make }}" required>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-car"></i></span>
+                                <input type="text" class="form-control" id="make" name="make" value="{{ car.make }}" required>
+                            </div>
                         </div>
                         <div class="col-md-4">
                             <label for="model" class="form-label">Model</label>
-                            <input type="text" class="form-control" id="model" name="model" value="{{ car.model }}" required>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-car-side"></i></span>
+                                <input type="text" class="form-control" id="model" name="model" value="{{ car.model }}" required>
+                            </div>
                         </div>
                         <div class="col-md-4">
                             <label for="year" class="form-label">Year</label>
-                            <input type="number" class="form-control" id="year" name="year" value="{{ car.year }}" min="1900" max="2024" required>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                                <input type="number" class="form-control" id="year" name="year" value="{{ car.year }}" min="1900" max="2024" required>
+                            </div>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="price" class="form-label">Price ($)</label>
-                            <input type="number" class="form-control" id="price" name="price" value="{{ car.price }}" min="0" step="0.01" required>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-dollar-sign"></i></span>
+                                <input type="number" class="form-control" id="price" name="price" value="{{ car.price }}" min="0" step="0.01" required>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label for="mileage" class="form-label">Mileage</label>
-                            <input type="number" class="form-control" id="mileage" name="mileage" value="{{ car.mileage }}" min="0" required>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-tachometer-alt"></i></span>
+                                <input type="number" class="form-control" id="mileage" name="mileage" value="{{ car.mileage }}" min="0" required>
+                            </div>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="category_id" class="form-label">Category</label>
-                        <select class="form-select" id="category_id" name="category_id" required>
-                            <option value="">Select a category</option>
-                            {% for category in categories %}
-                            <option value="{{ category.id }}" {% if category.id == car.category_id %}selected{% endif %}>
-                                {{ category.name }}
-                            </option>
-                            {% endfor %}
-                        </select>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-tags"></i></span>
+                            <select class="form-select" id="category_id" name="category_id" required>
+                                <option value="">Select a category</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}" {% if category.id == car.category_id %}selected{% endif %}>
+                                    {{ category.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" name="description" rows="5" required>{{ car.description }}</textarea>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+                            <textarea class="form-control" id="description" name="description" rows="5" required>{{ car.description }}</textarea>
+                        </div>
+                        <div class="form-text">Provide detailed information about the car's condition, features, and history.</div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="image" class="form-label">Update Car Image</label>
-                        <input type="file" class="form-control" id="image" name="image" accept="image/*">
-                        <div class="form-text">Upload a new image to replace the current one. Leave empty to keep the current image. Supported formats: PNG, JPG, JPEG, GIF</div>
+                    <div class="mb-4">
+                        <label for="image" class="form-label">Update Car Images</label>
+                        <div class="drop-zone" id="dropZone">
+                            <div class="text-center p-4 border-2 border-dashed rounded-3">
+                                <i class="fas fa-cloud-upload-alt fa-3x mb-3 text-muted"></i>
+                                <p class="mb-2">Drag & drop your images here</p>
+                                <p class="text-muted mb-2">or</p>
+                                <input type="file" class="form-control" id="image" name="image" accept="image/*" multiple>
+                            </div>
+                        </div>
+                        <div id="imagePreview" class="mt-3 row g-2"></div>
+                        <div class="form-text">Upload new images to replace the current ones. Supported formats: PNG, JPG, JPEG, GIF</div>
                     </div>
 
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Update Listing</button>
-                        <a href="{{ url_for('cars.view_car', car_id=car.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Update Listing
+                        </button>
+                        <a href="{{ url_for('cars.view_car', car_id=car.id) }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+// Drag and drop functionality
+const dropZone = document.getElementById('dropZone');
+const imagePreview = document.getElementById('imagePreview');
+const imageInput = document.getElementById('image');
+
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, highlight, false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, unhighlight, false);
+});
+
+function highlight(e) {
+    dropZone.classList.add('border-primary');
+}
+
+function unhighlight(e) {
+    dropZone.classList.remove('border-primary');
+}
+
+dropZone.addEventListener('drop', handleDrop, false);
+
+function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    handleFiles(files);
+}
+
+imageInput.addEventListener('change', function() {
+    handleFiles(this.files);
+});
+
+function handleFiles(files) {
+    imagePreview.innerHTML = '';
+    [...files].forEach(file => {
+        if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const div = document.createElement('div');
+                div.className = 'col-md-3';
+                div.innerHTML = `
+                    <div class="position-relative">
+                        <img src="${e.target.result}" class="img-fluid rounded" alt="Preview">
+                        <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1" onclick="this.parentElement.parentElement.remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                imagePreview.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+// Form validation
+document.getElementById('editCarForm').addEventListener('submit', function(e) {
+    const year = document.getElementById('year').value;
+    const price = document.getElementById('price').value;
+    const mileage = document.getElementById('mileage').value;
+    
+    if (year < 1900 || year > new Date().getFullYear() + 1) {
+        e.preventDefault();
+        alert('Please enter a valid year between 1900 and ' + (new Date().getFullYear() + 1));
+        return;
+    }
+    
+    if (price < 0) {
+        e.preventDefault();
+        alert('Price cannot be negative');
+        return;
+    }
+    
+    if (mileage < 0) {
+        e.preventDefault();
+        alert('Mileage cannot be negative');
+        return;
+    }
+});
+
+function removeImage() {
+    if (confirm('Are you sure you want to remove this image?')) {
+        // Add AJAX call to remove image
+        document.querySelector('.position-relative').remove();
+    }
+}
+</script>
+
+<style>
+.drop-zone {
+    transition: all 0.3s ease;
+}
+
+.drop-zone.border-primary {
+    background-color: rgba(13, 110, 253, 0.1);
+    border: 2px dashed #0d6efd !important;
+}
+
+.border-dashed {
+    border-style: dashed !important;
+}
+</style>
+{% endblock %}
 {% endblock %} 
