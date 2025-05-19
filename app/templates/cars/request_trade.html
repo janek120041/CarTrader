@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Request Trade{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Request Trade</h2>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Car You Want</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% if requested_car.image_url %}
+                                    <img src="{{ url_for('static', filename=requested_car.image_url) }}" class="img-fluid rounded mb-3" alt="{{ requested_car.title }}">
+                                    {% endif %}
+                                    <h5>{{ requested_car.title }}</h5>
+                                    <p class="mb-1"><strong>Make:</strong> {{ requested_car.make }}</p>
+                                    <p class="mb-1"><strong>Model:</strong> {{ requested_car.model }}</p>
+                                    <p class="mb-1"><strong>Year:</strong> {{ requested_car.year }}</p>
+                                    <p class="mb-0"><strong>Price:</strong> ${{ "%.2f"|format(requested_car.price) }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="offered_car_id" class="form-label">Select Your Car to Trade</label>
+                            <select class="form-select" id="offered_car_id" name="offered_car_id" required>
+                                <option value="">Choose a car to offer...</option>
+                                {% for car in user_cars %}
+                                <option value="{{ car.id }}">
+                                    {{ car.title }} ({{ car.year }} {{ car.make }} {{ car.model }}) - ${{ "%.2f"|format(car.price) }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message (Optional)</label>
+                            <textarea class="form-control" id="message" name="message" rows="3" placeholder="Add a message to the car owner..."></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Send Trade Request</button>
+                            <a href="{{ url_for('cars.view_car', car_id=requested_car.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="trade-requests">
+    <h2>Trade Requests</h2>
+    <div class="requests-section">
+        <h3>Outgoing Requests</h3>
+        <ul>
+            {% for req in outgoing_requests %}
+            <li>{{ req.sender_car }} &rarr; {{ req.receiver_car }} <button class="btn">Cancel</button></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="requests-section">
+        <h3>Incoming Requests</h3>
+        <ul>
+            {% for req in incoming_requests %}
+            <li>{{ req.sender_car }} &rarr; {{ req.receiver_car }} <button class="btn">Accept</button> <button class="btn">Reject</button></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,156 @@
+:root {
+    --bs-primary: #007bff;
+    --bs-primary-rgb: 0, 123, 255;
+    --bs-secondary: #6c757d;
+    --bs-success: #28a745;
+    --bs-info: #17a2b8;
+    --bs-warning: #ffc107;
+    --bs-danger: #dc3545;
+    --bs-light: #f8f9fa;
+    --bs-dark: #343a40;
+}
+
+body {
+    font-family: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    background-color: var(--bs-light);
+    color: var(--bs-dark);
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,.05);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.car-image {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+}
+
+.car-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--bs-primary);
+}
+
+.car-details {
+    font-size: 0.9rem;
+    color: var(--bs-secondary);
+}
+
+.car-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.search-form {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,.05);
+    margin-bottom: 2rem;
+}
+
+.comment-section {
+    margin-top: 2rem;
+}
+
+.comment {
+    border-left: 3px solid var(--bs-primary);
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+}
+
+.rating {
+    color: var(--bs-warning);
+}
+
+.inquiry-card {
+    border-left: 3px solid var(--bs-info);
+    margin-bottom: 1rem;
+}
+
+.profile-section {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,.05);
+}
+
+.btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.pagination .page-link {
+    color: var(--bs-primary);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.form-control:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.alert {
+    border: none;
+    border-radius: 0.5rem;
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.category-badge {
+    background-color: var(--bs-light);
+    color: var(--bs-primary);
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 1rem;
+    text-decoration: none;
+}
+
+.category-badge:hover {
+    background-color: var(--bs-primary);
+    color: white;
+}
+
+.footer {
+    background-color: var(--bs-light);
+    padding: 2rem 0;
+    margin-top: 3rem;
+}
+
+@media (max-width: 768px) {
+    .car-image {
+        height: 150px;
+    }
+    
+    .search-form {
+        padding: 1rem;
+    }
+    
+    .profile-section {
+        padding: 1rem;
+    }
+} 

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Car Listing{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">Edit Car Listing</h2>
+                
+                {% if car.image_url %}
+                <div class="text-center mb-4">
+                    <img src="{{ url_for('static', filename=car.image_url) }}" alt="{{ car.title }}" class="img-fluid rounded" style="max-height: 300px;">
+                </div>
+                {% endif %}
+
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <label for="title" class="form-label">Listing Title</label>
+                            <input type="text" class="form-control" id="title" name="title" value="{{ car.title }}" required>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="make" class="form-label">Make</label>
+                            <input type="text" class="form-control" id="make" name="make" value="{{ car.make }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="model" class="form-label">Model</label>
+                            <input type="text" class="form-control" id="model" name="model" value="{{ car.model }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="year" class="form-label">Year</label>
+                            <input type="number" class="form-control" id="year" name="year" value="{{ car.year }}" min="1900" max="2024" required>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="price" class="form-label">Price ($)</label>
+                            <input type="number" class="form-control" id="price" name="price" value="{{ car.price }}" min="0" step="0.01" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="mileage" class="form-label">Mileage</label>
+                            <input type="number" class="form-control" id="mileage" name="mileage" value="{{ car.mileage }}" min="0" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="category_id" class="form-label">Category</label>
+                        <select class="form-select" id="category_id" name="category_id" required>
+                            <option value="">Select a category</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" {% if category.id == car.category_id %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="5" required>{{ car.description }}</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Update Car Image</label>
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                        <div class="form-text">Upload a new image to replace the current one. Leave empty to keep the current image. Supported formats: PNG, JPG, JPEG, GIF</div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Update Listing</button>
+                        <a href="{{ url_for('cars.view_car', car_id=car.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

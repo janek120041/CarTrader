@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Trade Requests{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Trade Requests</h2>
+
+    <!-- Received Trade Requests -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3 class="h5 mb-0">Received Trade Requests</h3>
+        </div>
+        <div class="card-body">
+            {% if received_requests %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>From</th>
+                            <th>Their Car</th>
+                            <th>Your Car</th>
+                            <th>Message</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for request in received_requests %}
+                        <tr>
+                            <td>{{ request.requester.username }}</td>
+                            <td>
+                                <a href="{{ url_for('cars.view_car', car_id=request.offered_car.id) }}">
+                                    {{ request.offered_car.year }} {{ request.offered_car.make }} {{ request.offered_car.model }}
+                                </a>
+                                <br>
+                                <small class="text-muted">${{ "%.2f"|format(request.offered_car.price) }}</small>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('cars.view_car', car_id=request.requested_car.id) }}">
+                                    {{ request.requested_car.year }} {{ request.requested_car.make }} {{ request.requested_car.model }}
+                                </a>
+                                <br>
+                                <small class="text-muted">${{ "%.2f"|format(request.requested_car.price) }}</small>
+                            </td>
+                            <td>{{ request.message or 'No message' }}</td>
+                            <td>
+                                <span class="badge {% if request.status == 'Pending' %}bg-warning{% elif request.status == 'Accepted' %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ request.status }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if request.status == 'Pending' %}
+                                <div class="btn-group">
+                                    <form method="POST" action="{{ url_for('cars.handle_trade_request', request_id=request.id, action='accept') }}" class="d-inline">
+                                        <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Are you sure you want to accept this trade?')">Accept</button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('cars.handle_trade_request', request_id=request.id, action='reject') }}" class="d-inline ms-1">
+                                        <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                    </form>
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No trade requests received.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sent Trade Requests -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="h5 mb-0">Sent Trade Requests</h3>
+        </div>
+        <div class="card-body">
+            {% if sent_requests %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>To</th>
+                            <th>Your Car</th>
+                            <th>Their Car</th>
+                            <th>Message</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for request in sent_requests %}
+                        <tr>
+                            <td>{{ request.owner.username }}</td>
+                            <td>
+                                <a href="{{ url_for('cars.view_car', car_id=request.offered_car.id) }}">
+                                    {{ request.offered_car.year }} {{ request.offered_car.make }} {{ request.offered_car.model }}
+                                </a>
+                                <br>
+                                <small class="text-muted">${{ "%.2f"|format(request.offered_car.price) }}</small>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('cars.view_car', car_id=request.requested_car.id) }}">
+                                    {{ request.requested_car.year }} {{ request.requested_car.make }} {{ request.requested_car.model }}
+                                </a>
+                                <br>
+                                <small class="text-muted">${{ "%.2f"|format(request.requested_car.price) }}</small>
+                            </td>
+                            <td>{{ request.message or 'No message' }}</td>
+                            <td>
+                                <span class="badge {% if request.status == 'Pending' %}bg-warning{% elif request.status == 'Accepted' %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ request.status }}
+                                </span>
+                            </td>
+                            <td>{{ request.created_at.strftime('%Y-%m-%d') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted">No trade requests sent.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

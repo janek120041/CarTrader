@@ -1,0 +1,214 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #07003b;
+    color: #fff;
+}
+.navbar {
+    background: #07003b;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 2rem;
+}
+.navbar-logo {
+    display: flex;
+    align-items: center;
+}
+.navbar-title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-left: 0.5rem;
+}
+.navbar-links a {
+    color: #fff;
+    text-decoration: none;
+    margin-left: 2rem;
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+.container {
+    padding: 2rem;
+}
+.welcome, .login-page, .register-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 3rem;
+}
+.login-box, .register-box {
+    background: #fff;
+    color: #222;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+    min-width: 320px;
+}
+.login-box input, .register-box input {
+    width: 100%;
+    margin: 0.5rem 0;
+    padding: 0.7rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+.btn, .btn-social {
+    background: #07003b;
+    color: #fff;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+    cursor: pointer;
+    font-size: 1rem;
+}
+.btn-social {
+    margin: 0.5rem 0.5rem 0 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-weight: bold;
+}
+.car-list-page {
+    display: flex;
+}
+.filters {
+    background: #181828;
+    padding: 2rem 1.5rem;
+    border-radius: 12px;
+    margin-right: 2rem;
+    min-width: 220px;
+    color: #fff;
+}
+.filters h2 {
+    margin-top: 0;
+}
+.filters label {
+    display: block;
+    margin: 1.2rem 0 0.5rem 0;
+}
+.filters select {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-top: 0.2rem;
+}
+.car-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    flex: 1;
+}
+.car-card {
+    background: #181828;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 1rem;
+}
+.car-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+.car-info {
+    padding: 1rem;
+    text-align: center;
+}
+.dashboard {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+.my-cars {
+    flex: 2;
+}
+.my-car-card {
+    background: #fff;
+    color: #222;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.my-car-card img {
+    width: 120px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-right: 1rem;
+}
+.dashboard-side {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.dashboard-box {
+    background: #fff;
+    color: #222;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.view-all {
+    display: block;
+    margin-top: 1rem;
+    color: #07003b;
+    text-decoration: underline;
+}
+.trade-requests {
+    background: #fff;
+    color: #222;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 700px;
+    margin: 2rem auto;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+}
+.requests-section {
+    margin-bottom: 2rem;
+}
+.requests-section ul {
+    list-style: none;
+    padding: 0;
+}
+.requests-section li {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.car-detail-page {
+    display: flex;
+    gap: 3rem;
+    margin-top: 2rem;
+    background: #fff;
+    color: #222;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+}
+.car-image img {
+    width: 400px;
+    height: 260px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+.car-details {
+    flex: 1;
+}
+.car-details ul {
+    list-style: none;
+    padding: 0;
+}
+.car-details li {
+    margin-bottom: 0.7rem;
+} 

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Inquiries{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <h3 class="mb-4">Received Inquiries</h3>
+        {% if received_inquiries %}
+        {% for inquiry in received_inquiries %}
+        <div class="card inquiry-card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title mb-0">
+                        Inquiry for {{ inquiry.car.title }}
+                    </h5>
+                    <span class="badge bg-{{ 'success' if inquiry.status == 'Responded' else 'warning' }}">
+                        {{ inquiry.status }}
+                    </span>
+                </div>
+                <p class="card-text">
+                    <small class="text-muted">From: {{ inquiry.sender.username }}</small><br>
+                    <small class="text-muted">Date: {{ inquiry.created_at.strftime('%B %d, %Y') }}</small>
+                </p>
+                <p class="card-text">{{ inquiry.message }}</p>
+                
+                {% if inquiry.response %}
+                <div class="alert alert-info mt-3">
+                    <h6>Your Response:</h6>
+                    <p class="mb-1">{{ inquiry.response }}</p>
+                    <small class="text-muted">Sent: {{ inquiry.response_date.strftime('%B %d, %Y') }}</small>
+                </div>
+                {% else %}
+                <form method="POST" action="{{ url_for('cars.respond_to_inquiry', inquiry_id=inquiry.id) }}" class="mt-3">
+                    <div class="mb-3">
+                        <label for="response{{ inquiry.id }}" class="form-label">Your Response</label>
+                        <textarea class="form-control" id="response{{ inquiry.id }}" name="response" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Response</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="text-muted">No inquiries received yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="col-md-6">
+        <h3 class="mb-4">Sent Inquiries</h3>
+        {% if sent_inquiries %}
+        {% for inquiry in sent_inquiries %}
+        <div class="card inquiry-card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title mb-0">
+                        <a href="{{ url_for('cars.view_car', car_id=inquiry.car.id) }}" class="text-decoration-none">
+                            {{ inquiry.car.title }}
+                        </a>
+                    </h5>
+                    <span class="badge bg-{{ 'success' if inquiry.status == 'Responded' else 'warning' }}">
+                        {{ inquiry.status }}
+                    </span>
+                </div>
+                <p class="card-text">
+                    <small class="text-muted">To: {{ inquiry.car.owner.username }}</small><br>
+                    <small class="text-muted">Date: {{ inquiry.created_at.strftime('%B %d, %Y') }}</small>
+                </p>
+                <p class="card-text">{{ inquiry.message }}</p>
+                
+                {% if inquiry.response %}
+                <div class="alert alert-info mt-3">
+                    <h6>Response Received:</h6>
+                    <p class="mb-1">{{ inquiry.response }}</p>
+                    <small class="text-muted">Received: {{ inquiry.response_date.strftime('%B %d, %Y') }}</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="text-muted">No inquiries sent yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

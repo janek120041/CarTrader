@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="car-list-page">
+    <aside class="filters">
+        <h2>Filters</h2>
+        <label>Brand
+            <select><option>Any</option></select>
+        </label>
+        <label>Year
+            <select><option>Any</option></select>
+        </label>
+        <label>Location
+            <select><option>Any</option></select>
+        </label>
+    </aside>
+    <section class="car-cards">
+        {% for car in cars %}
+        <div class="car-card">
+            <img src="{{ car.image_url }}" alt="{{ car.make }} {{ car.model }}">
+            <div class="car-info">
+                <h3>{{ car.make }} {{ car.model }}</h3>
+                <p>{{ car.year }}</p>
+                <a href="{{ url_for('main.car_detail', car_id=car.id) }}" class="btn">Propose Trade</a>
+            </div>
+        </div>
+        {% endfor %}
+    </section>
+</div>
+{% endblock %} 
