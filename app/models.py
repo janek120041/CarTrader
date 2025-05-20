@@ -65,6 +65,38 @@ class Car(db.Model):
     sent_trade_requests = db.relationship('TradeRequest', foreign_keys='TradeRequest.offered_car_id', backref='offered_car', lazy=True)
     received_trade_requests = db.relationship('TradeRequest', foreign_keys='TradeRequest.requested_car_id', backref='requested_car', lazy=True)
 
+    def mark_as_sold(self):
+        """Mark the car as sold"""
+        self.status = 'Sold'
+        db.session.commit()
+
+    def mark_as_under_negotiation(self):
+        """Mark the car as under negotiation"""
+        if self.status != 'Sold':
+            self.status = 'Under Negotiation'
+            db.session.commit()
+
+    def mark_as_available(self):
+        """Mark the car as available"""
+        if self.status != 'Sold':
+            self.status = 'Available'
+            db.session.commit()
+
+    @property
+    def is_available(self):
+        """Check if the car is available for trade"""
+        return self.status == 'Available'
+
+    @property
+    def is_sold(self):
+        """Check if the car is sold"""
+        return self.status == 'Sold'
+
+    @property
+    def is_under_negotiation(self):
+        """Check if the car is under negotiation"""
+        return self.status == 'Under Negotiation'
+
 class TradeRequest(db.Model):
     __tablename__ = 'trade_requests'
     id = db.Column(db.Integer, primary_key=True)
