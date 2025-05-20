@@ -24,7 +24,14 @@
                         </div>
                         <div class="ms-4">
                             <h2 class="mb-1">{{ current_user.username }}</h2>
-                            <p class="text-muted mb-2">Member since {{ current_user.created_at.strftime('%B %Y') }}</p>
+                            <p class="text-muted mb-2">
+                                Member since 
+                                {% if current_user.created_at %}
+                                    {{ current_user.created_at.strftime('%B %Y') }}
+                                {% else %}
+                                    Unknown Date
+                                {% endif %}
+                            </p>
                             <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editProfileModal">
                                 <i class="fas fa-edit me-2"></i>Edit Profile
                             </button>
@@ -43,7 +50,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6 class="mb-0">Active Listings</h6>
-                            <h2 class="mb-0">{{ active_listings|length }}</h2>
+                            <h2 class="mb-0">{{ active_listings|length if active_listings else 0 }}</h2>
                         </div>
                         <i class="fas fa-car fa-2x opacity-50"></i>
                     </div>
@@ -56,7 +63,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6 class="mb-0">Cars Sold</h6>
-                            <h2 class="mb-0">{{ sold_cars|length }}</h2>
+                            <h2 class="mb-0">{{ sold_cars|length if sold_cars else 0 }}</h2>
                         </div>
                         <i class="fas fa-check-circle fa-2x opacity-50"></i>
                     </div>
@@ -69,7 +76,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6 class="mb-0">Inquiries</h6>
-                            <h2 class="mb-0">{{ inquiries|length }}</h2>
+                            <h2 class="mb-0">{{ inquiries|length if inquiries else 0 }}</h2>
                         </div>
                         <i class="fas fa-envelope fa-2x opacity-50"></i>
                     </div>
@@ -82,7 +89,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6 class="mb-0">Trade Requests</h6>
-                            <h2 class="mb-0">{{ trade_requests|length }}</h2>
+                            <h2 class="mb-0">{{ trade_requests|length if trade_requests else 0 }}</h2>
                         </div>
                         <i class="fas fa-exchange-alt fa-2x opacity-50"></i>
                     </div>
@@ -123,10 +130,11 @@
                 <div class="tab-pane fade show active" id="listings" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h5 class="mb-0">Your Car Listings</h5>
-                        <a href="{{ url_for('cars.create_listing') }}" class="btn btn-primary">
+                        <a href="{{ url_for('cars.new_car') }}" class="btn btn-primary">
                             <i class="fas fa-plus me-2"></i>Add New Listing
                         </a>
                     </div>
+                    {% if active_listings %}
                     <div class="row">
                         {% for car in active_listings %}
                         <div class="col-md-6 col-lg-4 mb-4">
@@ -163,6 +171,13 @@
                         </div>
                         {% endfor %}
                     </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-car fa-3x text-muted mb-3"></i>
+                        <h5>No Active Listings</h5>
+                        <p class="text-muted">Start selling by adding your first car listing!</p>
+                    </div>
+                    {% endif %}
                 </div>
 
                 <!-- Inquiries Tab -->
@@ -256,7 +271,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="editProfileForm" method="POST" action="{{ url_for('auth.update_profile') }}">
+                <form id="editProfileForm" method="POST" action="{{ url_for('auth.edit_profile') }}">
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
                         <input type="text" class="form-control" id="username" name="username" value="{{ current_user.username }}" required>

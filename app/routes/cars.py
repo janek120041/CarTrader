@@ -17,7 +17,12 @@ def save_image(file):
         # Add timestamp to filename to prevent duplicates
         name, ext = os.path.splitext(filename)
         filename = f"{name}_{int(datetime.utcnow().timestamp())}{ext}"
-        file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        
+        # Ensure upload directory exists
+        upload_dir = os.path.join(current_app.root_path, 'static', 'car_images')
+        os.makedirs(upload_dir, exist_ok=True)
+        
+        file_path = os.path.join(upload_dir, filename)
         file.save(file_path)
         return f'car_images/{filename}'
     return None
@@ -32,7 +37,9 @@ def view_car(car_id):
 @login_required
 def new_car():
     categories = Category.query.all()
+    
     if request.method == 'POST':
+        # Get form data
         title = request.form.get('title')
         make = request.form.get('make')
         model = request.form.get('model')
@@ -41,29 +48,43 @@ def new_car():
         price = request.form.get('price')
         description = request.form.get('description')
         category_id = request.form.get('category_id')
-
-        car = Car(
-            title=title,
-            make=make,
-            model=model,
-            year=year,
-            mileage=mileage,
-            price=price,
-            description=description,
-            category_id=category_id,
-            owner_id=current_user.id
-        )
-
-        if 'image' in request.files:
-            image_url = save_image(request.files['image'])
-            if image_url:
-                car.image_url = image_url
-
-        db.session.add(car)
-        db.session.commit()
-        flash('Your car has been listed!', 'success')
-        return redirect(url_for('cars.view_car', car_id=car.id))
-
+        
+        # Validate required fields
+        if not all([title, make, model, year, mileage, price, category_id]):
+            flash('Please fill in all required fields', 'danger')
+            return render_template('cars/new.html', categories=categories)
+        
+        try:
+            # Create new car object
+            car = Car(
+                title=title,
+                make=make,
+                model=model,
+                year=int(year),
+                mileage=int(mileage),
+                price=float(price),
+                description=description,
+                category_id=int(category_id),
+                owner_id=current_user.id
+            )
+            
+            # Handle image upload
+            if 'image' in request.files:
+                image_url = save_image(request.files['image'])
+                if image_url:
+                    car.image_url = image_url
+            
+            # Save to database
+            db.session.add(car)
+            db.session.commit()
+            
+            flash('Your car has been listed successfully!', 'success')
+            return redirect(url_for('auth.profile'))
+            
+        except (ValueError, TypeError):
+            flash('Please enter valid values for year, mileage, and price', 'danger')
+            return render_template('cars/new.html', categories=categories)
+        
     return render_template('cars/new.html', categories=categories)
 
 @cars.route('/car/<int:car_id>/edit', methods=['GET', 'POST'])
