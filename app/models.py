@@ -61,6 +61,7 @@ class Car(db.Model):
     owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     image_url = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(20), default='Available')  # Available, Under Negotiation, Sold
     sent_trade_requests = db.relationship('TradeRequest', foreign_keys='TradeRequest.offered_car_id', backref='offered_car', lazy=True)
     received_trade_requests = db.relationship('TradeRequest', foreign_keys='TradeRequest.requested_car_id', backref='requested_car', lazy=True)
 
