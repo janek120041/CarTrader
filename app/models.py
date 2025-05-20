@@ -118,6 +118,17 @@ class TradeRequest(db.Model):
             requested_car = Car.query.get(self.requested_car_id)
             offered_car.mark_as_sold()
             requested_car.mark_as_sold()
+            # Create trade history entry
+            trade_history = TradeHistory(
+                trade_request_id=self.id,
+                offered_car_id=self.offered_car_id,
+                requested_car_id=self.requested_car_id,
+                offered_car_details=f"{offered_car.year} {offered_car.make} {offered_car.model}",
+                requested_car_details=f"{requested_car.year} {requested_car.make} {requested_car.model}",
+                requester_id=self.requester_id,
+                owner_id=self.owner_id
+            )
+            db.session.add(trade_history)
             # Update other pending requests for these cars to Rejected
             self._reject_other_requests()
             db.session.commit()
@@ -158,6 +169,31 @@ class TradeRequest(db.Model):
                 TradeRequest.requested_car_id == car_id
             )
         ).count() > 0
+
+class TradeHistory(db.Model):
+    """Model to track completed car trades"""
+    __tablename__ = 'trade_history'
+    id = db.Column(db.Integer, primary_key=True)
+    trade_request_id = db.Column(db.Integer, db.ForeignKey('trade_requests.id'), nullable=False)
+    offered_car_id = db.Column(db.Integer, db.ForeignKey('cars.id'), nullable=False)
+    requested_car_id = db.Column(db.Integer, db.ForeignKey('cars.id'), nullable=False)
+    offered_car_details = db.Column(db.String(200), nullable=False)  # Stored for historical record
+    requested_car_details = db.Column(db.String(200), nullable=False)  # Stored for historical record
+    requester_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    completed_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships
+    trade_request = db.relationship('TradeRequest', backref='trade_history', lazy=True)
+    offered_car = db.relationship('Car', foreign_keys=[offered_car_id], backref='offered_trades_history', lazy=True)
+    requested_car = db.relationship('Car', foreign_keys=[requested_car_id], backref='requested_trades_history', lazy=True)
+    requester = db.relationship('User', foreign_keys=[requester_id], backref='trades_made_history', lazy=True)
+    owner = db.relationship('User', foreign_keys=[owner_id], backref='trades_received_history', lazy=True)
+
+    @property
+    def trade_description(self):
+        """Return a human-readable description of the trade"""
+        return f"Trade of {self.offered_car_details} for {self.requested_car_details} completed on {self.completed_at.strftime('%Y-%m-%d')}"
 
 class Comment(db.Model):
     __tablename__ = 'comments'
