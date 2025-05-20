@@ -19,6 +19,7 @@ class User(UserMixin, db.Model):
     cars = db.relationship('Car', backref='owner', lazy=True)
     sent_trade_requests = db.relationship('TradeRequest', foreign_keys='TradeRequest.requester_id', backref='requester', lazy=True)
     received_trade_requests = db.relationship('TradeRequest', foreign_keys='TradeRequest.owner_id', backref='owner', lazy=True)
+    notifications = db.relationship('Notification', backref='user', lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -40,6 +41,11 @@ class User(UserMixin, db.Model):
     @property
     def is_anonymous(self):
         return False
+
+    @property
+    def unread_notifications_count(self):
+        """Get the count of unread notifications"""
+        return Notification.query.filter_by(user_id=self.id, is_read=False).count()
 
 class Category(db.Model):
     __tablename__ = 'categories'
@@ -129,6 +135,9 @@ class TradeRequest(db.Model):
                 owner_id=self.owner_id
             )
             db.session.add(trade_history)
+            # Create notifications for both users
+            Notification.create_trade_status_notification(self.requester_id, self, 'Accepted')
+            Notification.create_trade_status_notification(self.owner_id, self, 'Accepted')
             # Update other pending requests for these cars to Rejected
             self._reject_other_requests()
             db.session.commit()
@@ -216,4 +225,80 @@ class Inquiry(db.Model):
     status = db.Column(db.String(20), default='Pending', nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     response = db.Column(db.Text)
-    response_date = db.Column(db.DateTime) 
+    response_date = db.Column(db.DateTime)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.car_id:
+            car = Car.query.get(self.car_id)
+            if car and car.owner_id:
+                Notification.create_inquiry_notification(car.owner_id, self)
+
+class Notification(db.Model):
+    """Model for user notifications"""
+    __tablename__ = 'notifications'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    title = db.Column(db.String(100), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    notification_type = db.Column(db.String(50), nullable=False)  # trade_request, inquiry, status_update, etc.
+    related_id = db.Column(db.Integer)  # ID of related object (trade request, inquiry, etc.)
+    is_read = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    @classmethod
+    def create_trade_request_notification(cls, user_id, trade_request):
+        """Create a notification for a new trade request"""
+        offered_car = Car.query.get(trade_request.offered_car_id)
+        requested_car = Car.query.get(trade_request.requested_car_id)
+        notification = cls(
+            user_id=user_id,
+            title="New Trade Request",
+            message=f"New trade request: {offered_car.year} {offered_car.make} {offered_car.model} "
+                   f"for your {requested_car.year} {requested_car.make} {requested_car.model}",
+            notification_type="trade_request",
+            related_id=trade_request.id
+        )
+        db.session.add(notification)
+        db.session.commit()
+        return notification
+
+    @classmethod
+    def create_trade_status_notification(cls, user_id, trade_request, status):
+        """Create a notification for a trade request status update"""
+        offered_car = Car.query.get(trade_request.offered_car_id)
+        requested_car = Car.query.get(trade_request.requested_car_id)
+        title = f"Trade Request {status.capitalize()}"
+        message = f"Trade request for {offered_car.year} {offered_car.make} {offered_car.model} "
+        message += f"has been {status.lower()}"
+        
+        notification = cls(
+            user_id=user_id,
+            title=title,
+            message=message,
+            notification_type="trade_status",
+            related_id=trade_request.id
+        )
+        db.session.add(notification)
+        db.session.commit()
+        return notification
+
+    @classmethod
+    def create_inquiry_notification(cls, user_id, inquiry):
+        """Create a notification for a new inquiry"""
+        car = Car.query.get(inquiry.car_id)
+        notification = cls(
+            user_id=user_id,
+            title="New Inquiry",
+            message=f"New inquiry received for your {car.year} {car.make} {car.model}",
+            notification_type="inquiry",
+            related_id=inquiry.id
+        )
+        db.session.add(notification)
+        db.session.commit()
+        return notification
+
+    def mark_as_read(self):
+        """Mark the notification as read"""
+        self.is_read = True
+        db.session.commit() 
