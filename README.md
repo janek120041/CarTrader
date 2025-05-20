@@ -35,7 +35,3 @@ CarTrader is a web platform for users to trade cars with each other. Built with 
   - `auth.py` - Authentication routes
   - `templates/` - Jinja2 HTML templates
   - `static/` - CSS and static files
-
-## Notes
-- Replace `car_logo.png` in `static/` with your own logo for best results.
-- This is a starter scaffold; you can expand features and logic as needed. 
