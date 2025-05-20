@@ -109,6 +109,56 @@ class TradeRequest(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    def accept_trade(self):
+        """Accept the trade request and update car statuses"""
+        if self.status == 'Pending':
+            self.status = 'Accepted'
+            # Mark both cars as sold
+            offered_car = Car.query.get(self.offered_car_id)
+            requested_car = Car.query.get(self.requested_car_id)
+            offered_car.mark_as_sold()
+            requested_car.mark_as_sold()
+            # Update other pending requests for these cars to Rejected
+            self._reject_other_requests()
+            db.session.commit()
+
+    def reject_trade(self):
+        """Reject the trade request and update car statuses"""
+        if self.status == 'Pending':
+            self.status = 'Rejected'
+            # Mark both cars as available if they have no other pending requests
+            offered_car = Car.query.get(self.offered_car_id)
+            requested_car = Car.query.get(self.requested_car_id)
+            if not self._has_other_pending_requests(offered_car.id):
+                offered_car.mark_as_available()
+            if not self._has_other_pending_requests(requested_car.id):
+                requested_car.mark_as_available()
+            db.session.commit()
+
+    def _reject_other_requests(self):
+        """Reject all other pending requests for both cars"""
+        other_requests = TradeRequest.query.filter(
+            TradeRequest.id != self.id,
+            TradeRequest.status == 'Pending',
+            db.or_(
+                TradeRequest.offered_car_id.in_([self.offered_car_id, self.requested_car_id]),
+                TradeRequest.requested_car_id.in_([self.offered_car_id, self.requested_car_id])
+            )
+        ).all()
+        for request in other_requests:
+            request.status = 'Rejected'
+
+    def _has_other_pending_requests(self, car_id):
+        """Check if a car has other pending trade requests"""
+        return TradeRequest.query.filter(
+            TradeRequest.id != self.id,
+            TradeRequest.status == 'Pending',
+            db.or_(
+                TradeRequest.offered_car_id == car_id,
+                TradeRequest.requested_car_id == car_id
+            )
+        ).count() > 0
+
 class Comment(db.Model):
     __tablename__ = 'comments'
     id = db.Column(db.Integer, primary_key=True)
