@@ -9,7 +9,7 @@
     </div>
     <div class="col-md-4 text-end">
         {% if current_user.is_authenticated %}
-        <a href="{{ url_for('cars.new_car') }}" class="btn btn-primary">List a Car</a>
+        <a href="{{ url_for('cars.list_car') }}" class="btn btn-primary">List a Car</a>
         {% endif %}
     </div>
 </div>
@@ -22,11 +22,11 @@
             </div>
             <div class="card-body">
                 <div class="list-group">
-                    <a href="{{ url_for('cars.list_cars') }}" class="list-group-item list-group-item-action {% if not request.args.get('category') %}active{% endif %}">
+                    <a href="{{ url_for('cars.list_car') }}" class="list-group-item list-group-item-action {% if not request.args.get('category') %}active{% endif %}">
                         All Categories
                     </a>
                     {% for category in categories %}
-                    <a href="{{ url_for('cars.list_cars', category=category.id) }}" class="list-group-item list-group-item-action {% if request.args.get('category')|int == category.id %}active{% endif %}">
+                    <a href="{{ url_for('cars.list_car', category=category.id) }}" class="list-group-item list-group-item-action {% if request.args.get('category')|int == category.id %}active{% endif %}">
                         {{ category.name }}
                     </a>
                     {% endfor %}
@@ -61,14 +61,14 @@
             <ul class="pagination justify-content-center">
                 {% if cars.has_prev %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ url_for('cars.list_cars', page=cars.prev_num) }}">Previous</a>
+                    <a class="page-link" href="{{ url_for('cars.list_car', page=cars.prev_num) }}">Previous</a>
                 </li>
                 {% endif %}
                 
                 {% for page_num in cars.iter_pages() %}
                     {% if page_num %}
                     <li class="page-item {% if page_num == cars.page %}active{% endif %}">
-                        <a class="page-link" href="{{ url_for('cars.list_cars', page=page_num) }}">{{ page_num }}</a>
+                        <a class="page-link" href="{{ url_for('cars.list_car', page=page_num) }}">{{ page_num }}</a>
                     </li>
                     {% else %}
                     <li class="page-item disabled">
@@ -79,7 +79,7 @@
                 
                 {% if cars.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="{{ url_for('cars.list_cars', page=cars.next_num) }}">Next</a>
+                    <a class="page-link" href="{{ url_for('cars.list_car', page=cars.next_num) }}">Next</a>
                 </li>
                 {% endif %}
             </ul>

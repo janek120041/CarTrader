@@ -11,11 +11,11 @@
                 <h1 class="display-4 fw-bold mb-4">Find Your Perfect Car</h1>
                 <p class="lead mb-4">Browse through our extensive collection of quality used cars or list your own for sale.</p>
                 <div class="d-flex gap-3">
-                    <a href="{{ url_for('cars.list_cars') }}" class="btn btn-light btn-lg">
+                    <a href="{{ url_for('cars.list_car') }}" class="btn btn-light btn-lg">
                         <i class="fas fa-search me-2"></i>Browse Cars
                     </a>
                     {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('cars.create_listing') }}" class="btn btn-outline-light btn-lg">
+                    <a href="{{ url_for('cars.list_car') }}" class="btn btn-outline-light btn-lg">
                         <i class="fas fa-plus-circle me-2"></i>List Your Car
                     </a>
                     {% else %}
