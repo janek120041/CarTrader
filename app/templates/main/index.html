@@ -1,93 +1,110 @@
 {% extends "base.html" %}
 
-{% block content %}
-<div class="row mb-4">
-    <div class="col-md-8">
-        <h1>Latest Cars</h1>
-    </div>
-    {% if current_user.is_authenticated %}
-    <div class="col-md-4 text-end">
-        <a href="{{ url_for('cars.list_car') }}" class="btn btn-primary">List Your Car</a>
-    </div>
-    {% endif %}
-</div>
+{% block title %}Home{% endblock %}
 
-<div class="row">
-    {% for car in cars.items %}
-    <div class="col-md-4 mb-4">
-        <div class="card h-100">
-            {% if car.image_filename %}
-            <img src="{{ url_for('static', filename='car_images/' + car.image_filename) }}" class="card-img-top" alt="{{ car.title }}" style="height: 200px; object-fit: cover;">
-            {% else %}
-            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
-                 style="height: 200px;">
-                <i class="fas fa-car fa-3x text-muted"></i>
+{% block content %}
+<!-- Hero Section -->
+<section class="hero bg-primary text-white py-5" style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Find Your Perfect Car</h1>
+                <p class="lead mb-4">Browse through our extensive collection of quality used cars or list your own for sale.</p>
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('cars.list_cars') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-search me-2"></i>Browse Cars
+                    </a>
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('cars.create_listing') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-plus-circle me-2"></i>List Your Car
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-user-plus me-2"></i>Join Now
+                    </a>
+                    {% endif %}
+                </div>
             </div>
-            {% endif %}
-            <div class="card-body">
-                <h5 class="card-title">{{ car.title }}</h5>
-                <p class="card-text">
-                    <strong>Price:</strong> ${{ "{:,.2f}".format(car.price) }}<br>
-                    <strong>Year:</strong> {{ car.year }}<br>
-                    <strong>Mileage:</strong> {{ "{:,}".format(car.mileage) }} miles
-                </p>
-                <a href="{{ url_for('cars.view_car', slug=car.slug) }}" class="btn btn-primary">View Details</a>
+            <div class="col-lg-6 d-none d-lg-block">
+                <img src="{{ url_for('static', filename='images/hero-car.png') }}" alt="Car illustration" class="img-fluid">
             </div>
         </div>
     </div>
-    {% endfor %}
-</div>
+</section>
 
-{% if cars.items %}
-<nav aria-label="Page navigation">
-    <ul class="pagination justify-content-center">
-        {% if cars.has_prev %}
-        <li class="page-item">
-            <a class="page-link" href="{{ url_for('main.index', page=cars.prev_num) }}">Previous</a>
-        </li>
-        {% else %}
-        <li class="page-item disabled">
-            <span class="page-link">Previous</span>
-        </li>
-        {% endif %}
+<!-- Featured Cars Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Featured Cars</h2>
+        <div class="row g-4">
+            {% for car in cars %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    {% if car.image_filename %}
+                    <img src="{{ url_for('static', filename='car_images/' + car.image_filename) }}" 
+                         class="card-img-top" alt="{{ car.title }}"
+                         style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                         style="height: 200px;">
+                        <i class="fas fa-car fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ car.title }}</h5>
+                        <p class="card-text text-muted">
+                            <i class="fas fa-calendar-alt me-2"></i>{{ car.year }}
+                            <span class="mx-2">|</span>
+                            <i class="fas fa-tachometer-alt me-2"></i>{{ car.mileage }} miles
+                        </p>
+                        <p class="card-text">
+                            <span class="h5 text-primary">${{ "%.2f"|format(car.price) }}</span>
+                        </p>
+                        <a href="{{ url_for('cars.view_car', slug=car.slug) }}" class="btn btn-primary">
+                            View Details
+                        </a>
+                    </div>
+                    <div class="card-footer bg-white">
+                        <small class="text-muted">
+                            <i class="fas fa-user me-2"></i>Listed by {{ car.seller.username }}
+                            <span class="mx-2">•</span>
+                            <i class="fas fa-clock me-2"></i>{{ car.created_at.strftime('%B %d, %Y') }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 
-        {% for page_num in cars.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
-            {% if page_num %}
-                {% if cars.page == page_num %}
-                <li class="page-item active">
-                    <span class="page-link">{{ page_num }}</span>
-                </li>
-                {% else %}
-                <li class="page-item">
-                    <a class="page-link" href="{{ url_for('main.index', page=page_num) }}">{{ page_num }}</a>
-                </li>
-                {% endif %}
-            {% else %}
-                <li class="page-item disabled">
-                    <span class="page-link">...</span>
-                </li>
-            {% endif %}
-        {% endfor %}
-
-        {% if cars.has_next %}
-        <li class="page-item">
-            <a class="page-link" href="{{ url_for('main.index', page=cars.next_num) }}">Next</a>
-        </li>
-        {% else %}
-        <li class="page-item disabled">
-            <span class="page-link">Next</span>
-        </li>
-        {% endif %}
-    </ul>
-</nav>
-{% else %}
-<div class="text-center mt-5">
-    <h3>No cars listed yet.</h3>
-    {% if current_user.is_authenticated %}
-    <p>Be the first to <a href="{{ url_for('cars.list_car') }}">list a car</a>!</p>
-    {% else %}
-    <p><a href="{{ url_for('auth.login') }}">Login</a> or <a href="{{ url_for('auth.register') }}">Register</a> to list your car!</p>
-    {% endif %}
-</div>
-{% endif %}
+<!-- Features Section -->
+<section class="bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Why Choose CarTrader?</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                    <h4>Secure Trading</h4>
+                    <p class="text-muted">Our platform ensures safe and secure transactions between buyers and sellers.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <i class="fas fa-search fa-3x text-primary mb-3"></i>
+                    <h4>Wide Selection</h4>
+                    <p class="text-muted">Browse through a vast collection of cars from trusted sellers.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <i class="fas fa-comments fa-3x text-primary mb-3"></i>
+                    <h4>Direct Communication</h4>
+                    <p class="text-muted">Connect directly with sellers through our messaging system.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %} 
