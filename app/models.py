@@ -13,6 +13,9 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    avatar = db.Column(db.String(200))
+    bio = db.Column(db.Text)
     cars = db.relationship('Car', backref='owner', lazy=True)
     sent_trade_requests = db.relationship('TradeRequest', foreign_keys='TradeRequest.requester_id', backref='requester', lazy=True)
     received_trade_requests = db.relationship('TradeRequest', foreign_keys='TradeRequest.owner_id', backref='owner', lazy=True)
@@ -22,6 +25,21 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    def get_id(self):
+        return str(self.id)
+
+    @property
+    def is_active(self):
+        return True
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
 
 class Category(db.Model):
     __tablename__ = 'categories'
@@ -66,6 +84,9 @@ class Comment(db.Model):
     rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Add the relationship to the User model
+    user = db.relationship('User', backref=db.backref('comments', lazy=True))
 
 class Inquiry(db.Model):
     __tablename__ = 'inquiries'
