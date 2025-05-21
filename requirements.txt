@@ -9,4 +9,6 @@ Pillow==10.0.0
 Bootstrap-Flask==2.2.0
 WTForms==3.0.1
 Flask-Migrate==4.0.4
-python-slugify==8.0.1 
+python-slugify==8.0.1
+flask-moment==1.0.6
+flask-mail==0.10.0 
