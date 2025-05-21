@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Inquiries{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="mb-0">Received Inquiries</h2>
+            </div>
+            <div class="card-body">
+                {% if received %}
+                    {% for inquiry in received %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ inquiry.car.title }}</h5>
+                            <p class="card-text"><strong>From:</strong> {{ inquiry.sender.username }}</p>
+                            <p class="card-text"><strong>Message:</strong> {{ inquiry.message }}</p>
+                            <p class="card-text"><small class="text-muted">Sent on {{ inquiry.date_sent.strftime('%B %d, %Y %I:%M %p') }}</small></p>
+                            <a href="{{ url_for('cars.view_car', car_id=inquiry.car.id) }}" class="btn btn-primary btn-sm">View Car</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center">No inquiries received yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="mb-0">Sent Inquiries</h2>
+            </div>
+            <div class="card-body">
+                {% if sent %}
+                    {% for inquiry in sent %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ inquiry.car.title }}</h5>
+                            <p class="card-text"><strong>To:</strong> {{ inquiry.receiver.username }}</p>
+                            <p class="card-text"><strong>Message:</strong> {{ inquiry.message }}</p>
+                            <p class="card-text"><small class="text-muted">Sent on {{ inquiry.date_sent.strftime('%B %d, %Y %I:%M %p') }}</small></p>
+                            <a href="{{ url_for('cars.view_car', car_id=inquiry.car.id) }}" class="btn btn-primary btn-sm">View Car</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center">No inquiries sent yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Latest Cars</h1>
+    </div>
+    {% if current_user.is_authenticated %}
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('cars.list_car') }}" class="btn btn-primary">List Your Car</a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="row">
+    {% for car in cars.items %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            {% if car.image_filename %}
+            <img src="{{ url_for('static', filename='car_images/' + car.image_filename) }}" class="card-img-top" alt="{{ car.title }}" style="height: 200px; object-fit: cover;">
+            {% else %}
+            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                 style="height: 200px;">
+                <i class="fas fa-car fa-3x text-muted"></i>
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ car.title }}</h5>
+                <p class="card-text">
+                    <strong>Price:</strong> ${{ "{:,.2f}".format(car.price) }}<br>
+                    <strong>Year:</strong> {{ car.year }}<br>
+                    <strong>Mileage:</strong> {{ "{:,}".format(car.mileage) }} miles
+                </p>
+                <a href="{{ url_for('cars.view_car', slug=car.slug) }}" class="btn btn-primary">View Details</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if cars.items %}
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {% if cars.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('main.index', page=cars.prev_num) }}">Previous</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">Previous</span>
+        </li>
+        {% endif %}
+
+        {% for page_num in cars.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+            {% if page_num %}
+                {% if cars.page == page_num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ page_num }}</span>
+                </li>
+                {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.index', page=page_num) }}">{{ page_num }}</a>
+                </li>
+                {% endif %}
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if cars.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('main.index', page=cars.next_num) }}">Next</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">Next</span>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% else %}
+<div class="text-center mt-5">
+    <h3>No cars listed yet.</h3>
+    {% if current_user.is_authenticated %}
+    <p>Be the first to <a href="{{ url_for('cars.list_car') }}">list a car</a>!</p>
+    {% else %}
+    <p><a href="{{ url_for('auth.login') }}">Login</a> or <a href="{{ url_for('auth.register') }}">Register</a> to list your car!</p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %} 

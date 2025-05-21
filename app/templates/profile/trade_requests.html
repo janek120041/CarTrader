@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Trade Requests</h1>
+
+    <!-- Received Trade Requests -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="fas fa-inbox me-2"></i>Received Requests</h4>
+        </div>
+        <div class="card-body">
+            {% if received_requests %}
+                <div class="list-group">
+                    {% for request in received_requests %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">Trade Request from {{ request.requester.username }}</h5>
+                                    <p class="mb-1">
+                                        Offering: {{ request.offered_car.make }} {{ request.offered_car.model }} ({{ request.offered_car.year }})
+                                        <br>
+                                        For your: {{ request.requested_car.make }} {{ request.requested_car.model }} ({{ request.requested_car.year }})
+                                    </p>
+                                    <small class="text-muted">Sent on: {{ request.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                </div>
+                                <div>
+                                    {% if request.status == 'Pending' %}
+                                        <button class="btn btn-success btn-sm me-2">Accept</button>
+                                        <button class="btn btn-danger btn-sm">Decline</button>
+                                    {% else %}
+                                        <span class="badge bg-{{ 'success' if request.status == 'Accepted' else 'danger' }}">
+                                            {{ request.status }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No received trade requests.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sent Trade Requests -->
+    <div class="card">
+        <div class="card-header bg-secondary text-white">
+            <h4 class="mb-0"><i class="fas fa-paper-plane me-2"></i>Sent Requests</h4>
+        </div>
+        <div class="card-body">
+            {% if sent_requests %}
+                <div class="list-group">
+                    {% for request in sent_requests %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="mb-1">Trade Request to {{ request.owner.username }}</h5>
+                                    <p class="mb-1">
+                                        Offering: {{ request.offered_car.make }} {{ request.offered_car.model }} ({{ request.offered_car.year }})
+                                        <br>
+                                        For their: {{ request.requested_car.make }} {{ request.requested_car.model }} ({{ request.requested_car.year }})
+                                    </p>
+                                    <small class="text-muted">Sent on: {{ request.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                </div>
+                                <div>
+                                    <span class="badge bg-{{ 'success' if request.status == 'Accepted' else 'secondary' if request.status == 'Pending' else 'danger' }}">
+                                        {{ request.status }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No sent trade requests.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

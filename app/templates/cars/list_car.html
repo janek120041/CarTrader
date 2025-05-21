@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% from 'bootstrap5/form.html' import render_form %}
+
+{% block title %}List Your Car - CarTrader{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h2 class="text-center mb-4">List Your Car</h2>
+                    
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <form method="POST" enctype="multipart/form-data" class="listing-form">
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Listing Title -->
+                        <div class="mb-4">
+                            <label for="title" class="form-label">Listing Title</label>
+                            {{ form.title(class="form-control form-control-lg", placeholder="e.g., Trade - Audi R8 2022") }}
+                            {% if form.title.errors %}
+                                {% for error in form.title.errors %}
+                                    <span class="text-danger">{{ error }}</span>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="row mb-4">
+                            <!-- Make -->
+                            <div class="col-md-4">
+                                <label for="make" class="form-label">Make</label>
+                                {{ form.make(class="form-control", placeholder="e.g., Audi") }}
+                                {% if form.make.errors %}
+                                    {% for error in form.make.errors %}
+                                        <span class="text-danger">{{ error }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <!-- Model -->
+                            <div class="col-md-4">
+                                <label for="model" class="form-label">Model</label>
+                                {{ form.model(class="form-control", placeholder="e.g., R8") }}
+                                {% if form.model.errors %}
+                                    {% for error in form.model.errors %}
+                                        <span class="text-danger">{{ error }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <!-- Year -->
+                            <div class="col-md-4">
+                                <label for="year" class="form-label">Year</label>
+                                {{ form.year(class="form-control", placeholder="2022") }}
+                                {% if form.year.errors %}
+                                    {% for error in form.year.errors %}
+                                        <span class="text-danger">{{ error }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <!-- Price -->
+                            <div class="col-md-6">
+                                <label for="price" class="form-label">Price ($)</label>
+                                {{ form.price(class="form-control", placeholder="120000") }}
+                                {% if form.price.errors %}
+                                    {% for error in form.price.errors %}
+                                        <span class="text-danger">{{ error }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <!-- Mileage -->
+                            <div class="col-md-6">
+                                <label for="mileage" class="form-label">Mileage</label>
+                                {{ form.mileage(class="form-control", placeholder="15000") }}
+                                {% if form.mileage.errors %}
+                                    {% for error in form.mileage.errors %}
+                                        <span class="text-danger">{{ error }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Category -->
+                        <div class="mb-4">
+                            <label for="category_id" class="form-label">Category</label>
+                            {{ form.category_id(class="form-control") }}
+                            {% if form.category_id.errors %}
+                                {% for error in form.category_id.errors %}
+                                    <span class="text-danger">{{ error }}</span>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-4">
+                            <label for="description" class="form-label">Description</label>
+                            {{ form.description(class="form-control", rows=4, placeholder="Great condition, orange color, executive spec") }}
+                            {% if form.description.errors %}
+                                {% for error in form.description.errors %}
+                                    <span class="text-danger">{{ error }}</span>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <!-- Car Images -->
+                        <div class="mb-4">
+                            <label for="image" class="form-label">Car Image</label>
+                            <div class="image-upload-container">
+                                {{ form.image(class="form-control") }}
+                                {% if form.image.errors %}
+                                    {% for error in form.image.errors %}
+                                        <span class="text-danger">{{ error }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                                <small class="text-muted d-block mt-2">
+                                    Upload a nice image of your car. Supported formats: PNG, JPG
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                            <button type="button" class="btn btn-outline-secondary" onclick="history.back()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .listing-form .form-control,
+    .listing-form .form-select {
+        border: 1px solid var(--border-color);
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        border-radius: 0.5rem;
+        background-color: #fff;
+        transition: all 0.3s ease;
+    }
+
+    .listing-form .form-control:focus,
+    .listing-form .form-select:focus {
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(64, 112, 244, 0.1);
+    }
+
+    .listing-form .form-label {
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .listing-form .form-control::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.7;
+    }
+
+    .image-upload-container {
+        border: 2px dashed var(--border-color);
+        border-radius: 0.5rem;
+        padding: 2rem;
+        text-align: center;
+        background-color: #f8fafc;
+        transition: all 0.3s ease;
+    }
+
+    .image-upload-container:hover {
+        border-color: var(--primary-blue);
+        background-color: #f0f7ff;
+    }
+
+    .btn-lg {
+        padding: 1rem 2rem;
+        font-weight: 600;
+    }
+
+    .text-danger {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %} 

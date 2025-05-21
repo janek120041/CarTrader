@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}{{ car.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <img src="{{ url_for('static', filename='car_images/' + car.image_file) }}" class="card-img-top" alt="{{ car.title }}">
+            <div class="card-body">
+                <h1 class="card-title">{{ car.title }}</h1>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Model:</strong> {{ car.model }}</p>
+                        <p><strong>Year:</strong> {{ car.year }}</p>
+                        <p><strong>Mileage:</strong> {{ car.mileage }} miles</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Category:</strong> {{ car.category.name }}</p>
+                        <p><strong>Price:</strong> ${{ "%.2f"|format(car.price) }}</p>
+                        <p><strong>Listed:</strong> {{ car.date_posted.strftime('%B %d, %Y') }}</p>
+                    </div>
+                </div>
+                <h4>Description</h4>
+                <p class="card-text">{{ car.description }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="mb-0">Contact Seller</h4>
+            </div>
+            <div class="card-body">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.id != car.seller_id %}
+                        <form method="POST" action="{{ url_for('cars.inquire', car_id=car.id) }}">
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Your Message</label>
+                                <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">Send Inquiry</button>
+                            </div>
+                        </form>
+                    {% else %}
+                        <p class="text-center">This is your listing</p>
+                    {% endif %}
+                {% else %}
+                    <p class="text-center">Please <a href="{{ url_for('auth.login') }}">login</a> to contact the seller</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Seller Information</h4>
+            </div>
+            <div class="card-body">
+                <p><strong>Listed by:</strong> {{ car.seller.username }}</p>
+                <p><strong>Member since:</strong> {{ car.seller.last_seen.strftime('%B %Y') }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

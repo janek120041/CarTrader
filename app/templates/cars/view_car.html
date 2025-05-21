@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}{{ car.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <!-- Main Car Information -->
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <!-- Car Image -->
+                <div class="card-img-wrapper" style="height: 400px; overflow: hidden;">
+                    {% if car.image_filename %}
+                    <img src="{{ url_for('static', filename='car_images/' + car.image_filename) }}" 
+                         class="card-img-top w-100 h-100" alt="{{ car.title }}" 
+                         style="object-fit: cover;">
+                    {% else %}
+                    <div class="d-flex align-items-center justify-content-center h-100 bg-light">
+                        <i class="fas fa-car fa-4x text-muted"></i>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Car Details -->
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <h1 class="card-title h2">{{ car.title }}</h1>
+                        <span class="badge bg-{{ 'success' if car.status == 'Available' else 'warning' if car.status == 'Under Negotiation' else 'secondary' }}">
+                            {{ car.status }}
+                        </span>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>Make:</strong> {{ car.make }}</p>
+                            <p class="mb-2"><strong>Model:</strong> {{ car.model }}</p>
+                            <p class="mb-2"><strong>Year:</strong> {{ car.year }}</p>
+                            <p class="mb-2"><strong>Category:</strong> {{ car.category.name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>Price:</strong> ${{ "{:,.2f}".format(car.price) }}</p>
+                            <p class="mb-2"><strong>Mileage:</strong> {{ "{:,}".format(car.mileage) }} miles</p>
+                            <p class="mb-2"><strong>Listed by:</strong> {{ car.seller.username }}</p>
+                            <p class="mb-2"><strong>Listed on:</strong> {{ car.created_at.strftime('%B %d, %Y') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h4>Description</h4>
+                        <p class="card-text">{{ car.description }}</p>
+                    </div>
+
+                    {% if current_user == car.seller %}
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('cars.edit_car', slug=car.slug) }}" class="btn btn-primary">
+                            <i class="fas fa-edit me-1"></i>Edit Listing
+                        </a>
+                        <form action="{{ url_for('cars.delete_car', slug=car.slug) }}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this listing?')">
+                                <i class="fas fa-trash me-1"></i>Delete
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar - Contact and Trade -->
+        <div class="col-md-4">
+            {% if current_user.is_authenticated and current_user != car.seller %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">Propose a Trade</h4>
+                </div>
+                <div class="card-body">
+                    {% if current_user.cars.filter_by(sold=False).all() %}
+                    <form action="{{ url_for('trades.propose_trade', car_id=car.id) }}" method="POST">
+                        <div class="mb-3">
+                            <label for="trade_car" class="form-label">Select Your Car to Trade</label>
+                            <select class="form-select" id="trade_car" name="trade_car_id" required>
+                                <option value="">Choose a car...</option>
+                                {% for user_car in current_user.cars.filter_by(sold=False).all() %}
+                                <option value="{{ user_car.id }}">{{ user_car.year }} {{ user_car.make }} {{ user_car.model }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message (Optional)</label>
+                            <textarea class="form-control" id="message" name="message" rows="3" 
+                                      placeholder="Add any additional details about your trade proposal..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-exchange-alt me-1"></i>Propose Trade
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <p class="mb-3">You need to list a car before you can propose a trade.</p>
+                        <a href="{{ url_for('cars.list_car') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-1"></i>List Your Car
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">Contact Seller</h4>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">
+                        <i class="fas fa-user me-2"></i>{{ car.seller.username }}
+                    </p>
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('messages.send', recipient_id=car.seller.id) }}" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-envelope me-1"></i>Send Message
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-sign-in-alt me-1"></i>Login to Contact
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .card-img-wrapper img {
+        transition: transform 0.3s ease;
+    }
+    .card-img-wrapper:hover img {
+        transform: scale(1.02);
+    }
+</style>
+{% endblock %} 

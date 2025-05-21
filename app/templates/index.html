@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% from 'bootstrap5/pagination.html' import render_pagination %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-md-8 mx-auto text-center">
+            <h1 class="display-4 mb-3">Find Your Perfect Car</h1>
+            <p class="lead text-muted">Browse through our collection of cars or list your own for trade</p>
+            
+            <!-- Search Form -->
+            <form class="search-form mt-4" method="GET" action="{{ url_for('main.index') }}">
+                <div class="input-group">
+                    <input type="text" class="form-control search-input" name="search" 
+                           placeholder="Search by make, model, or year..." value="{{ request.args.get('search', '') }}">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+                <a href="{{ url_for('main.index') }}" 
+                   class="btn {% if not request.args.get('category') %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    All Cars
+                </a>
+                {% for category in categories %}
+                <a href="{{ url_for('main.index', category=category.id) }}"
+                   class="btn {% if request.args.get('category')|int == category.id %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    {{ category.name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Car Listings -->
+    <div class="row">
+        {% if cars.items %}
+            {% for car in cars.items %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    {% if car.image_filename %}
+                    <img src="{{ url_for('static', filename='car_images/' + car.image_filename) }}" 
+                         class="card-img-top" alt="{{ car.title }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                         style="height: 200px;">
+                        <i class="fas fa-car fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0">{{ car.title }}</h5>
+                            <span class="badge bg-{{ 'success' if car.is_available else 'warning' if car.is_under_negotiation else 'secondary' }}">
+                                {{ car.status }}
+                            </span>
+                        </div>
+                        <p class="card-text text-muted mb-2">
+                            <i class="fas fa-car me-1"></i> {{ car.make }} {{ car.model }} {{ car.year }}
+                        </p>
+                        <p class="card-text mb-2">
+                            <i class="fas fa-tag me-1"></i> ${{ "{:,.2f}".format(car.price) }}
+                        </p>
+                        <p class="card-text mb-3">
+                            <i class="fas fa-road me-1"></i> {{ "{:,}".format(car.mileage) }} miles
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{{ url_for('cars.car_details', slug=car.slug) }}" 
+                               class="btn btn-primary">View Details</a>
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                {{ car.created_at.strftime('%Y-%m-%d') }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <div class="card">
+                <div class="card-body">
+                    <i class="fas fa-car fa-3x text-muted mb-3"></i>
+                    <h3>No cars listed yet.</h3>
+                    <p class="text-muted">Be the first to list a car!</p>
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('cars.list_car') }}" class="btn btn-primary">
+                        <i class="fas fa-plus-circle me-1"></i> List a Car
+                    </a>
+                    {% else %}
+                    <div>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary me-2">Login</a>
+                        or
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary ms-2">Register</a>
+                        to list your car
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Pagination -->
+    {% if cars.items %}
+    <div class="row mt-4">
+        <div class="col-12 d-flex justify-content-center">
+            {{ render_pagination(cars) }}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>My Cars</h2>
+        <a href="{{ url_for('cars.list_car') }}" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-1"></i> List a New Car
+        </a>
+    </div>
+
+    <!-- Active Listings -->
+    <h3 class="h4 mb-3">Active Listings</h3>
+    {% if active_listings %}
+    <div class="row">
+        {% for car in active_listings %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                {% if car.image_filename %}
+                <img src="{{ url_for('static', filename='car_images/' + car.image_filename) }}" 
+                     class="card-img-top" alt="{{ car.title }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                     style="height: 200px;">
+                    <i class="fas fa-car fa-3x text-muted"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title mb-0">{{ car.title }}</h5>
+                        <span class="badge bg-success">Active</span>
+                    </div>
+                    <p class="card-text text-muted">
+                        {{ car.year }} {{ car.make }} {{ car.model }}
+                    </p>
+                    <p class="card-text">
+                        <strong>Price:</strong> ${{ "{:,.2f}".format(car.price) }}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{{ url_for('cars.view_car', slug=car.slug) }}" 
+                           class="btn btn-primary btn-sm">View Details</a>
+                        <div>
+                            <a href="{{ url_for('cars.edit_car', slug=car.slug) }}" 
+                               class="btn btn-outline-primary btn-sm me-1">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button class="btn btn-outline-danger btn-sm" 
+                                    onclick="confirmDelete('{{ car.slug }}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        You don't have any active car listings.
+    </div>
+    {% endif %}
+
+    <!-- Sold Cars -->
+    <h3 class="h4 mb-3 mt-4">Sold Cars</h3>
+    {% if sold_cars %}
+    <div class="row">
+        {% for car in sold_cars %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                {% if car.image_filename %}
+                <img src="{{ url_for('static', filename='car_images/' + car.image_filename) }}" 
+                     class="card-img-top" alt="{{ car.title }}" style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                     style="height: 200px;">
+                    <i class="fas fa-car fa-3x text-muted"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title mb-0">{{ car.title }}</h5>
+                        <span class="badge bg-secondary">Sold</span>
+                    </div>
+                    <p class="card-text text-muted">
+                        {{ car.year }} {{ car.make }} {{ car.model }}
+                    </p>
+                    <p class="card-text">
+                        <strong>Sold Price:</strong> ${{ "{:,.2f}".format(car.price) }}
+                    </p>
+                    <a href="{{ url_for('cars.view_car', slug=car.slug) }}" 
+                       class="btn btn-outline-primary btn-sm">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        You haven't sold any cars yet.
+    </div>
+    {% endif %}
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this car listing?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function confirmDelete(slug) {
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    const form = document.getElementById('deleteForm');
+    form.action = "{{ url_for('cars.delete_car', slug='') }}" + slug;
+    modal.show();
+}
+</script>
+{% endblock %} 

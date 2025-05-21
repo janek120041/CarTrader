@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - {{ current_user.username }}{% endblock %}
+
+{% block content %}
+<div class="profile-header">
+    <div class="profile-avatar">
+        {{ current_user.username[0]|upper }}
+    </div>
+    <h2>{{ current_user.username }}</h2>
+    <p class="text-muted">Member since {{ current_user.member_since.strftime('%B %Y') }}</p>
+    <a href="#" class="btn btn-outline-primary btn-sm">
+        <i class="fas fa-edit"></i> Edit Profile
+    </a>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="stats-card active-listings">
+            <div>
+                <h3 class="stats-number">{{ active_listings|default(4) }}</h3>
+                <div>Active Listings</div>
+            </div>
+            <i class="fas fa-car fa-2x"></i>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card cars-sold">
+            <div>
+                <h3 class="stats-number">{{ cars_sold|default(0) }}</h3>
+                <div>Cars Sold</div>
+            </div>
+            <i class="fas fa-check-circle fa-2x"></i>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card inquiries">
+            <div>
+                <h3 class="stats-number">{{ inquiries|default(0) }}</h3>
+                <div>Inquiries</div>
+            </div>
+            <i class="fas fa-envelope fa-2x"></i>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card trade-requests">
+            <div>
+                <h3 class="stats-number">{{ trade_requests|default(1) }}</h3>
+                <div>Trade Requests</div>
+            </div>
+            <i class="fas fa-exchange-alt fa-2x"></i>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="listings-tab" data-bs-toggle="tab" href="#listings" role="tab">
+                    <i class="fas fa-list me-2"></i>My Listings
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="inquiries-tab" data-bs-toggle="tab" href="#inquiries" role="tab">
+                    <i class="fas fa-envelope me-2"></i>Inquiries
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="favorites-tab" data-bs-toggle="tab" href="#favorites" role="tab">
+                    <i class="fas fa-heart me-2"></i>Favorites
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content mt-4">
+            <div class="tab-pane fade show active" id="listings" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3>Your Car Listings</h3>
+                    <a href="{{ url_for('cars.list_car') }}" class="btn btn-primary btn-add-listing">
+                        <i class="fas fa-plus me-2"></i>Add New Listing
+                    </a>
+                </div>
+                
+                <div class="row">
+                    {% for car in cars %}
+                    <div class="col-md-4 mb-4">
+                        <div class="car-listing">
+                            <img src="{{ car.image_url }}" alt="{{ car.title }}" class="car-image">
+                            <div class="car-details">
+                                <h4 class="car-title">{{ car.title }}</h4>
+                                <p class="car-price">${{ "{:,.2f}".format(car.price) }}</p>
+                                <p class="text-muted">{{ car.year }} • {{ car.mileage }} miles</p>
+                            </div>
+                            <div class="car-actions">
+                                <a href="{{ url_for('cars.view', id=car.id) }}" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                <a href="{{ url_for('cars.edit', id=car.id) }}" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <button class="btn btn-outline-danger btn-sm" onclick="deleteCar({{ car.id }})">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="inquiries" role="tabpanel">
+                <h3>Inquiries</h3>
+                <!-- Add inquiries content here -->
+            </div>
+
+            <div class="tab-pane fade" id="favorites" role="tabpanel">
+                <h3>Favorites</h3>
+                <!-- Add favorites content here -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

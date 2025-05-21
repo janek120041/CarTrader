@@ -1,4 +1,54 @@
-.venv/
+# Python
 __pycache__/
-.DS_Store
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# Flask
+instance/
+.webassets-cache
+
+# Database
+*.db
+*.sqlite3
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment variables
+.env
+.env.*
+
+# Uploaded files
+app/static/car_images/*
+!app/static/car_images/.gitkeep
+app/static/uploads/*
+!app/static/uploads/.gitkeep
+
+# Logs
+logs/
+*.log

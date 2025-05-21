@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- User Profile Card -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body text-center">
+                    {% if current_user.avatar %}
+                    <img src="{{ url_for('static', filename='avatars/' + current_user.avatar) }}" 
+                         class="rounded-circle mb-3" alt="Profile Picture" style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center mx-auto mb-3"
+                         style="width: 150px; height: 150px;">
+                        <i class="fas fa-user fa-4x text-white"></i>
+                    </div>
+                    {% endif %}
+                    <h3 class="card-title">{{ current_user.username }}</h3>
+                    <p class="text-muted">Member since {{ current_user.member_since.strftime('%B %Y') }}</p>
+                    
+                    <!-- User Stats -->
+                    <div class="row text-center mt-4">
+                        <div class="col">
+                            <h4>{{ current_user.cars.count() }}</h4>
+                            <small class="text-muted">Cars Listed</small>
+                        </div>
+                        <div class="col">
+                            <h4>{{ current_user.total_reviews }}</h4>
+                            <small class="text-muted">Reviews</small>
+                        </div>
+                        <div class="col">
+                            <h4>
+                                {% if current_user.average_rating > 0 %}
+                                {{ "%.1f"|format(current_user.average_rating) }}
+                                <i class="fas fa-star text-warning"></i>
+                                {% else %}
+                                -
+                                {% endif %}
+                            </h4>
+                            <small class="text-muted">Rating</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Bio -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">About Me</h5>
+                    <p class="card-text">{{ current_user.bio or "No bio added yet." }}</p>
+                    <a href="{{ url_for('profile.edit_profile') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-edit me-1"></i> Edit Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Activity -->
+        <div class="col-md-8">
+            <!-- Tabs -->
+            <ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="cars-tab" data-bs-toggle="tab" data-bs-target="#cars">
+                        <i class="fas fa-car me-1"></i> My Cars
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="trades-tab" data-bs-toggle="tab" data-bs-target="#trades">
+                        <i class="fas fa-exchange-alt me-1"></i> Trade Requests
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews">
+                        <i class="fas fa-star me-1"></i> Reviews
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="profileTabsContent">
+                <!-- Cars Tab -->
+                <div class="tab-pane fade show active" id="cars">
+                    {% if current_user.cars.count() > 0 %}
+                    <div class="row">
+                        {% for car in current_user.cars %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100">
+                                {% if car.image_filename %}
+                                <img src="{{ url_for('static', filename='car_images/' + car.image_filename) }}" 
+                                     class="card-img-top" alt="{{ car.title }}" style="height: 200px; object-fit: cover;">
+                                {% else %}
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                     style="height: 200px;">
+                                    <i class="fas fa-car fa-3x text-muted"></i>
+                                </div>
+                                {% endif %}
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="card-title mb-0">{{ car.title }}</h5>
+                                        <span class="badge bg-{{ 'success' if car.is_available else 'warning' if car.is_under_negotiation else 'secondary' }}">
+                                            {{ car.status }}
+                                        </span>
+                                    </div>
+                                    <p class="card-text text-muted">
+                                        {{ car.year }} {{ car.make }} {{ car.model }}
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <a href="{{ url_for('cars.view_car', slug=car.slug) }}" 
+                                           class="btn btn-primary btn-sm">View Details</a>
+                                        <a href="{{ url_for('cars.edit_car', slug=car.slug) }}" 
+                                           class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-car fa-3x text-muted mb-3"></i>
+                        <h4>No Cars Listed</h4>
+                        <p class="text-muted">Start trading by listing your first car!</p>
+                        <a href="{{ url_for('cars.list_car') }}" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-1"></i> List a Car
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Trade Requests Tab -->
+                <div class="tab-pane fade" id="trades">
+                    {% if current_user.sent_trade_requests or current_user.received_trade_requests %}
+                    <div class="list-group">
+                        {% for trade in current_user.sent_trade_requests %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Trade Request Sent</h6>
+                                    <p class="mb-1">
+                                        Your {{ trade.offered_car.year }} {{ trade.offered_car.make }} 
+                                        for {{ trade.requested_car.year }} {{ trade.requested_car.make }}
+                                    </p>
+                                    <small class="text-muted">
+                                        {{ trade.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                    </small>
+                                </div>
+                                <span class="badge bg-{{ 'success' if trade.status == 'Accepted' 
+                                                    else 'danger' if trade.status == 'Rejected' 
+                                                    else 'warning' }}">
+                                    {{ trade.status }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% for trade in current_user.received_trade_requests %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Trade Request Received</h6>
+                                    <p class="mb-1">
+                                        {{ trade.requester.username }} wants to trade their 
+                                        {{ trade.offered_car.year }} {{ trade.offered_car.make }}
+                                        for your {{ trade.requested_car.year }} {{ trade.requested_car.make }}
+                                    </p>
+                                    <small class="text-muted">
+                                        {{ trade.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                    </small>
+                                </div>
+                                {% if trade.status == 'Pending' %}
+                                <div>
+                                    <button class="btn btn-success btn-sm accept-trade" data-trade-id="{{ trade.id }}">
+                                        Accept
+                                    </button>
+                                    <button class="btn btn-danger btn-sm reject-trade" data-trade-id="{{ trade.id }}">
+                                        Reject
+                                    </button>
+                                </div>
+                                {% else %}
+                                <span class="badge bg-{{ 'success' if trade.status == 'Accepted' 
+                                                    else 'danger' if trade.status == 'Rejected' 
+                                                    else 'warning' }}">
+                                    {{ trade.status }}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-exchange-alt fa-3x text-muted mb-3"></i>
+                        <h4>No Trade Requests</h4>
+                        <p class="text-muted">You haven't made or received any trade requests yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Reviews Tab -->
+                <div class="tab-pane fade" id="reviews">
+                    {% if current_user.reviews_received %}
+                    <div class="list-group">
+                        {% for review in current_user.reviews_received %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">{{ review.reviewer.username }}</h6>
+                                    <p class="mb-1">{{ review.review_text }}</p>
+                                    <small class="text-muted">
+                                        {{ review.created_at.strftime('%Y-%m-%d') }}
+                                    </small>
+                                </div>
+                                <div class="text-warning">
+                                    {% for _ in range(review.rating) %}
+                                    <i class="fas fa-star"></i>
+                                    {% endfor %}
+                                    {% for _ in range(5 - review.rating) %}
+                                    <i class="far fa-star"></i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                        <h4>No Reviews Yet</h4>
+                        <p class="text-muted">Complete some trades to start receiving reviews!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle trade request actions
+    document.querySelectorAll('.accept-trade').forEach(button => {
+        button.addEventListener('click', function() {
+            const tradeId = this.dataset.tradeId;
+            if (confirm('Are you sure you want to accept this trade?')) {
+                window.location.href = `/trade/${tradeId}/accept`;
+            }
+        });
+    });
+
+    document.querySelectorAll('.reject-trade').forEach(button => {
+        button.addEventListener('click', function() {
+            const tradeId = this.dataset.tradeId;
+            if (confirm('Are you sure you want to reject this trade?')) {
+                window.location.href = `/trade/${tradeId}/reject`;
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

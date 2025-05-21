@@ -1,37 +1,87 @@
 # CarTrader
 
-CarTrader is a web platform for users to trade cars with each other. Built with Flask, SQLAlchemy, and Flask-Login.
+A modern web application for trading cars, built with Flask and Bootstrap 5.
 
 ## Features
-- User registration and authentication
-- Browse and filter cars
-- Propose and manage car trades
-- User dashboard with car and trade management
 
-## Setup
+- User authentication and profiles
+- Car listings with images
+- Trade proposals system
+- Private messaging between users
+- Real-time notifications
+- User ratings and reviews
+- Responsive design
 
-1. Clone the repository and navigate to the project directory.
-2. (Optional) Create and activate a virtual environment:
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
+## Technology Stack
+
+- Python 3.8+
+- Flask 2.0+
+- SQLAlchemy
+- Bootstrap 5
+- SQLite (development)
+- Font Awesome 5
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/janek120041/CarTrader2.git
+cd CarTrader2
+```
+
+2. Create a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
 3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Run the app:
-   ```bash
-   python run.py
-   ```
-5. Visit `http://127.0.0.1:5000` in your browser.
+```bash
+pip install -r requirements.txt
+```
+
+4. Initialize the database:
+```bash
+flask db upgrade
+```
+
+5. Run the development server:
+```bash
+flask run
+```
 
 ## Project Structure
-- `run.py` - App entry point
-- `car_trader/` - Main app package
-  - `__init__.py` - App factory and extension setup
-  - `models.py` - Database models
-  - `routes.py` - Main routes
-  - `auth.py` - Authentication routes
-  - `templates/` - Jinja2 HTML templates
-  - `static/` - CSS and static files
+
+```
+CarTrader/
+├── app/
+│   ├── auth/         # Authentication views and forms
+│   ├── cars/         # Car listing views and forms
+│   ├── messages/     # Messaging system
+│   ├── profile/      # User profile views
+│   ├── static/       # Static files (CSS, JS, images)
+│   ├── templates/    # Jinja2 templates
+│   └── models.py     # Database models
+├── migrations/       # Database migrations
+├── instance/        # Instance-specific files
+├── config.py        # Configuration
+└── requirements.txt # Project dependencies
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Flask documentation and community
+- Bootstrap team for the excellent UI framework
+- All contributors and users of the platform

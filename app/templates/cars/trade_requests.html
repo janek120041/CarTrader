@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}Trade Requests{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4">Trade Requests</h2>
+
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="tab" href="#received" role="tab">
+                Received Requests
+                {% if received_requests %}
+                <span class="badge bg-primary ms-2">{{ received_requests|length }}</span>
+                {% endif %}
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#sent" role="tab">
+                Sent Requests
+                {% if sent_requests %}
+                <span class="badge bg-secondary ms-2">{{ sent_requests|length }}</span>
+                {% endif %}
+            </a>
+        </li>
+    </ul>
+
+    <!-- Tab content -->
+    <div class="tab-content">
+        <!-- Received Requests Tab -->
+        <div class="tab-pane fade show active" id="received" role="tabpanel">
+            {% if received_requests %}
+            <div class="row">
+                {% for request in received_requests %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span class="badge bg-{{ 'primary' if request.status == 'Pending' else 'success' if request.status == 'Accepted' else 'danger' }}">
+                                {{ request.status }}
+                            </span>
+                            <small class="text-muted">{{ request.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="card-title">Your Car</h5>
+                                    <div class="card mb-3">
+                                        {% if request.requested_car.image_url %}
+                                        <img src="{{ url_for('static', filename=request.requested_car.image_url) }}" 
+                                             class="card-img-top" alt="{{ request.requested_car.title }}"
+                                             style="height: 150px; object-fit: cover;">
+                                        {% endif %}
+                                        <div class="card-body">
+                                            <h6>{{ request.requested_car.title }}</h6>
+                                            <p class="card-text">
+                                                {{ request.requested_car.year }} {{ request.requested_car.make }} {{ request.requested_car.model }}<br>
+                                                <strong>${{ "{:,.2f}".format(request.requested_car.price) }}</strong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="card-title">Offered Car</h5>
+                                    <div class="card mb-3">
+                                        {% if request.offered_car.image_url %}
+                                        <img src="{{ url_for('static', filename=request.offered_car.image_url) }}" 
+                                             class="card-img-top" alt="{{ request.offered_car.title }}"
+                                             style="height: 150px; object-fit: cover;">
+                                        {% endif %}
+                                        <div class="card-body">
+                                            <h6>{{ request.offered_car.title }}</h6>
+                                            <p class="card-text">
+                                                {{ request.offered_car.year }} {{ request.offered_car.make }} {{ request.offered_car.model }}<br>
+                                                <strong>${{ "{:,.2f}".format(request.offered_car.price) }}</strong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if request.message %}
+                            <div class="mt-3">
+                                <strong>Message:</strong>
+                                <p class="card-text">{{ request.message }}</p>
+                            </div>
+                            {% endif %}
+                            {% if request.status == 'Pending' %}
+                            <div class="d-flex justify-content-end gap-2 mt-3">
+                                <form action="{{ url_for('cars.handle_trade_request', request_id=request.id, action='accept') }}" 
+                                      method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-success">Accept Trade</button>
+                                </form>
+                                <form action="{{ url_for('cars.handle_trade_request', request_id=request.id, action='reject') }}" 
+                                      method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger">Reject Trade</button>
+                                </form>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                <h5>No Received Requests</h5>
+                <p class="text-muted">You haven't received any trade requests yet.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sent Requests Tab -->
+        <div class="tab-pane fade" id="sent" role="tabpanel">
+            {% if sent_requests %}
+            <div class="row">
+                {% for request in sent_requests %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span class="badge bg-{{ 'primary' if request.status == 'Pending' else 'success' if request.status == 'Accepted' else 'danger' }}">
+                                {{ request.status }}
+                            </span>
+                            <small class="text-muted">{{ request.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5 class="card-title">Your Offer</h5>
+                                    <div class="card mb-3">
+                                        {% if request.offered_car.image_url %}
+                                        <img src="{{ url_for('static', filename=request.offered_car.image_url) }}" 
+                                             class="card-img-top" alt="{{ request.offered_car.title }}"
+                                             style="height: 150px; object-fit: cover;">
+                                        {% endif %}
+                                        <div class="card-body">
+                                            <h6>{{ request.offered_car.title }}</h6>
+                                            <p class="card-text">
+                                                {{ request.offered_car.year }} {{ request.offered_car.make }} {{ request.offered_car.model }}<br>
+                                                <strong>${{ "{:,.2f}".format(request.offered_car.price) }}</strong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="card-title">Requested Car</h5>
+                                    <div class="card mb-3">
+                                        {% if request.requested_car.image_url %}
+                                        <img src="{{ url_for('static', filename=request.requested_car.image_url) }}" 
+                                             class="card-img-top" alt="{{ request.requested_car.title }}"
+                                             style="height: 150px; object-fit: cover;">
+                                        {% endif %}
+                                        <div class="card-body">
+                                            <h6>{{ request.requested_car.title }}</h6>
+                                            <p class="card-text">
+                                                {{ request.requested_car.year }} {{ request.requested_car.make }} {{ request.requested_car.model }}<br>
+                                                <strong>${{ "{:,.2f}".format(request.requested_car.price) }}</strong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if request.message %}
+                            <div class="mt-3">
+                                <strong>Your Message:</strong>
+                                <p class="card-text">{{ request.message }}</p>
+                            </div>
+                            {% endif %}
+                            {% if request.status == 'Pending' %}
+                            <div class="d-flex justify-content-end mt-3">
+                                <form action="{{ url_for('cars.handle_trade_request', request_id=request.id, action='cancel') }}" 
+                                      method="POST">
+                                    <button type="submit" class="btn btn-danger">Cancel Request</button>
+                                </form>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-paper-plane fa-3x text-muted mb-3"></i>
+                <h5>No Sent Requests</h5>
+                <p class="text-muted">You haven't sent any trade requests yet.</p>
+                <a href="{{ url_for('main.index') }}" class="btn btn-primary">Browse Cars</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Preserve active tab after form submission
+document.addEventListener('DOMContentLoaded', function() {
+    // Get active tab from URL hash or localStorage
+    var activeTab = window.location.hash || localStorage.getItem('activeTradeTab') || '#received';
+    
+    // Activate the tab
+    var tab = new bootstrap.Tab(document.querySelector('a[href="' + activeTab + '"]'));
+    tab.show();
+    
+    // Store active tab when changed
+    document.querySelectorAll('a[data-bs-toggle="tab"]').forEach(function(el) {
+        el.addEventListener('shown.bs.tab', function(e) {
+            localStorage.setItem('activeTradeTab', e.target.getAttribute('href'));
+        });
+    });
+});
+</script>
+{% endblock %}
