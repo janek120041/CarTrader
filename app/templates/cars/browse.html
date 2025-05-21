@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Cars{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5 fw-bold">Browse Cars</h1>
+            <p class="text-muted">Find your perfect match from our collection of quality vehicles</p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('cars.list_car') }}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i>List Your Car
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Filters Sidebar -->
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('cars.browse_cars') }}" method="get" id="filterForm">
+                        <!-- Search -->
+                        <div class="mb-4">
+                            <label class="form-label">Search</label>
+                            <div class="input-group">
+                                <input type="text" name="q" class="form-control" placeholder="Search cars..." 
+                                       value="{{ current_filters.search_query or '' }}">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Categories -->
+                        <div class="mb-4">
+                            <label class="form-label">Category</label>
+                            <select name="category" class="form-select" onchange="this.form.submit()">
+                                <option value="">All Categories</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}" 
+                                        {% if current_filters.category_id == category.id %}selected{% endif %}>
+                                    {{ category.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Make -->
+                        <div class="mb-4">
+                            <label class="form-label">Make</label>
+                            <select name="make" class="form-select" onchange="this.form.submit()">
+                                <option value="">All Makes</option>
+                                {% for make in makes %}
+                                <option value="{{ make }}" 
+                                        {% if current_filters.make == make %}selected{% endif %}>
+                                    {{ make }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Price Range -->
+                        <div class="mb-4">
+                            <label class="form-label">Price Range</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="number" name="min_price" class="form-control" 
+                                           placeholder="Min" step="100"
+                                           value="{{ current_filters.min_price or '' }}"
+                                           min="{{ price_range[0] }}" max="{{ price_range[1] }}">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" name="max_price" class="form-control" 
+                                           placeholder="Max" step="100"
+                                           value="{{ current_filters.max_price or '' }}"
+                                           min="{{ price_range[0] }}" max="{{ price_range[1] }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Year Range -->
+                        <div class="mb-4">
+                            <label class="form-label">Year Range</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="number" name="min_year" class="form-control" 
+                                           placeholder="From" 
+                                           value="{{ current_filters.min_year or '' }}"
+                                           min="{{ year_range[0] }}" max="{{ year_range[1] }}">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" name="max_year" class="form-control" 
+                                           placeholder="To"
+                                           value="{{ current_filters.max_year or '' }}"
+                                           min="{{ year_range[0] }}" max="{{ year_range[1] }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sort By -->
+                        <div class="mb-4">
+                            <label class="form-label">Sort By</label>
+                            <select name="sort" class="form-select" onchange="this.form.submit()">
+                                <option value="newest" {% if current_filters.sort_by == 'newest' %}selected{% endif %}>
+                                    Newest First
+                                </option>
+                                <option value="price_low" {% if current_filters.sort_by == 'price_low' %}selected{% endif %}>
+                                    Price: Low to High
+                                </option>
+                                <option value="price_high" {% if current_filters.sort_by == 'price_high' %}selected{% endif %}>
+                                    Price: High to Low
+                                </option>
+                                <option value="year_new" {% if current_filters.sort_by == 'year_new' %}selected{% endif %}>
+                                    Year: Newest First
+                                </option>
+                                <option value="year_old" {% if current_filters.sort_by == 'year_old' %}selected{% endif %}>
+                                    Year: Oldest First
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Apply/Reset Buttons -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-filter me-2"></i>Apply Filters
+                            </button>
+                            <a href="{{ url_for('cars.browse_cars') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-undo me-2"></i>Reset Filters
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Car Listings -->
+        <div class="col-md-9">
+            <!-- Results Count and Sort Bar -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <p class="mb-0 text-muted">
+                    Showing {{ cars.items|length }} of {{ cars.total }} cars
+                </p>
+            </div>
+
+            {% if cars.items %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for car in cars.items %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm hover-shadow">
+                        <!-- Car Image -->
+                        <div class="position-relative">
+                            {% if car.image_filename %}
+                            <img src="{{ url_for('static', filename='car_images/' + car.image_filename) }}" 
+                                 class="card-img-top" alt="{{ car.title }}"
+                                 style="height: 200px; object-fit: cover;">
+                            {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                 style="height: 200px;">
+                                <i class="fas fa-car fa-3x text-muted"></i>
+                            </div>
+                            {% endif %}
+                            <div class="position-absolute top-0 end-0 p-2">
+                                <span class="badge bg-primary">{{ car.category.name }}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Car Details -->
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">{{ car.title }}</h5>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between text-muted mb-2">
+                                    <span><i class="fas fa-calendar-alt me-2"></i>{{ car.year }}</span>
+                                    <span><i class="fas fa-road me-2"></i>{{ "{:,}".format(car.mileage) }} mi</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="h4 text-primary mb-0">${{ "{:,.2f}".format(car.price) }}</span>
+                                    <small class="text-muted">
+                                        <i class="fas fa-map-marker-alt me-1"></i>{{ car.location or "Location N/A" }}
+                                    </small>
+                                </div>
+                            </div>
+                            <p class="card-text text-muted">{{ car.description[:100] }}{% if car.description|length > 100 %}...{% endif %}</p>
+                        </div>
+                        
+                        <!-- Card Footer -->
+                        <div class="card-footer bg-white border-top-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>{{ car.created_at.strftime('%b %d, %Y') }}
+                                </small>
+                                <a href="{{ url_for('cars.view_car', slug=car.slug) }}" class="btn btn-outline-primary btn-sm">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            <nav class="mt-4" aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if cars.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('cars.browse_cars', page=cars.prev_num, **current_filters) }}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in cars.iter_pages() %}
+                        {% if page_num %}
+                        <li class="page-item {% if page_num == cars.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('cars.browse_cars', page=page_num, **current_filters) }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if cars.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('cars.browse_cars', page=cars.next_num, **current_filters) }}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% else %}
+            <div class="text-center py-5">
+                <div class="card">
+                    <div class="card-body">
+                        <i class="fas fa-car fa-4x text-muted mb-3"></i>
+                        <h4>No cars found</h4>
+                        <p class="text-muted">Try adjusting your filters or search criteria</p>
+                        <a href="{{ url_for('cars.browse_cars') }}" class="btn btn-primary">
+                            <i class="fas fa-undo me-2"></i>Reset Filters
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+    .hover-shadow {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: var(--gray-700);
+    }
+    
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.1);
+    }
+</style>
+{% endblock %}
+{% endblock %} 

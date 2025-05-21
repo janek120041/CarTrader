@@ -133,4 +133,95 @@ def delete_car(slug):
     db.session.delete(car)
     db.session.commit()
     flash('Your listing has been deleted.', 'success')
-    return redirect(url_for('main.index')) 
+    return redirect(url_for('main.index'))
+
+@bp.route('/browse')
+def browse_cars():
+    # Get filter parameters
+    category_id = request.args.get('category', type=int)
+    make = request.args.get('make')
+    min_price = request.args.get('min_price', type=float)
+    max_price = request.args.get('max_price', type=float)
+    min_year = request.args.get('min_year', type=int)
+    max_year = request.args.get('max_year', type=int)
+    sort_by = request.args.get('sort', 'newest')
+    search_query = request.args.get('q')
+    
+    # Base query
+    query = Car.query.filter_by(sold=False)
+    
+    # Apply filters
+    if category_id:
+        query = query.filter_by(category_id=category_id)
+    if make:
+        query = query.filter(Car.make.ilike(f'%{make}%'))
+    if min_price:
+        query = query.filter(Car.price >= min_price)
+    if max_price:
+        query = query.filter(Car.price <= max_price)
+    if min_year:
+        query = query.filter(Car.year >= min_year)
+    if max_year:
+        query = query.filter(Car.year <= max_year)
+    if search_query:
+        query = query.filter(
+            db.or_(
+                Car.title.ilike(f'%{search_query}%'),
+                Car.make.ilike(f'%{search_query}%'),
+                Car.model.ilike(f'%{search_query}%'),
+                Car.description.ilike(f'%{search_query}%')
+            )
+        )
+    
+    # Apply sorting
+    if sort_by == 'price_low':
+        query = query.order_by(Car.price.asc())
+    elif sort_by == 'price_high':
+        query = query.order_by(Car.price.desc())
+    elif sort_by == 'year_new':
+        query = query.order_by(Car.year.desc())
+    elif sort_by == 'year_old':
+        query = query.order_by(Car.year.asc())
+    else:  # newest (default)
+        query = query.order_by(Car.created_at.desc())
+    
+    # Pagination
+    page = request.args.get('page', 1, type=int)
+    cars = query.paginate(page=page, per_page=9, error_out=False)
+    
+    # Get all categories for filter
+    categories = Category.query.order_by(Category.name).all()
+    
+    # Get unique makes for filter
+    makes = db.session.query(db.distinct(Car.make)).order_by(Car.make).all()
+    makes = [make[0] for make in makes if make[0]]
+    
+    # Get min/max values for price and year filters
+    price_range = db.session.query(
+        db.func.min(Car.price),
+        db.func.max(Car.price)
+    ).first()
+    year_range = db.session.query(
+        db.func.min(Car.year),
+        db.func.max(Car.year)
+    ).first()
+    
+    return render_template(
+        'cars/browse.html',
+        title='Browse Cars',
+        cars=cars,
+        categories=categories,
+        makes=makes,
+        price_range=price_range,
+        year_range=year_range,
+        current_filters={
+            'category_id': category_id,
+            'make': make,
+            'min_price': min_price,
+            'max_price': max_price,
+            'min_year': min_year,
+            'max_year': max_year,
+            'sort_by': sort_by,
+            'search_query': search_query
+        }
+    ) 
