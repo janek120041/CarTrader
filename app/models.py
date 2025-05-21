@@ -20,6 +20,8 @@ class User(UserMixin, db.Model):
     sent_trade_requests = db.relationship('TradeRequest', foreign_keys='TradeRequest.requester_id', backref='requester', lazy=True)
     received_trade_requests = db.relationship('TradeRequest', foreign_keys='TradeRequest.owner_id', backref='owner', lazy=True)
     notifications = db.relationship('Notification', backref='user', lazy=True)
+    reviews_received = db.relationship('UserReview', foreign_keys='UserReview.reviewed_user_id', backref='reviewed_user', lazy=True)
+    reviews_given = db.relationship('UserReview', foreign_keys='UserReview.reviewer_id', backref='reviewer', lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -46,6 +48,47 @@ class User(UserMixin, db.Model):
     def unread_notifications_count(self):
         """Get the count of unread notifications"""
         return Notification.query.filter_by(user_id=self.id, is_read=False).count()
+
+    @property
+    def average_rating(self):
+        """Calculate the user's average rating"""
+        reviews = UserReview.query.filter_by(reviewed_user_id=self.id).all()
+        if not reviews:
+            return 0
+        return sum(review.rating for review in reviews) / len(reviews)
+
+    @property
+    def total_reviews(self):
+        """Get the total number of reviews received"""
+        return UserReview.query.filter_by(reviewed_user_id=self.id).count()
+
+    @property
+    def rating_distribution(self):
+        """Get the distribution of ratings (1-5 stars)"""
+        reviews = UserReview.query.filter_by(reviewed_user_id=self.id).all()
+        distribution = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0}
+        for review in reviews:
+            distribution[review.rating] += 1
+        return distribution
+
+    def can_review_user(self, user_id):
+        """Check if the user can review another user based on completed trades"""
+        # Check if they have completed trades together
+        completed_trades = TradeHistory.query.filter(
+            ((TradeHistory.requester_id == self.id) & (TradeHistory.owner_id == user_id)) |
+            ((TradeHistory.requester_id == user_id) & (TradeHistory.owner_id == self.id))
+        ).first()
+        
+        if not completed_trades:
+            return False
+            
+        # Check if they haven't already reviewed for this trade
+        existing_review = UserReview.query.filter_by(
+            reviewer_id=self.id,
+            reviewed_user_id=user_id
+        ).first()
+        
+        return not existing_review
 
 class Category(db.Model):
     __tablename__ = 'categories'
@@ -301,4 +344,50 @@ class Notification(db.Model):
     def mark_as_read(self):
         """Mark the notification as read"""
         self.is_read = True
+        db.session.commit()
+
+class UserReview(db.Model):
+    """Model for user reviews and ratings"""
+    __tablename__ = 'user_reviews'
+    id = db.Column(db.Integer, primary_key=True)
+    reviewer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    reviewed_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)  # 1-5 stars
+    review_text = db.Column(db.Text)
+    trade_id = db.Column(db.Integer, db.ForeignKey('trade_history.id'))  # Optional link to specific trade
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Validation
+    __table_args__ = (
+        db.CheckConstraint('rating >= 1 AND rating <= 5', name='check_rating_range'),
+        db.UniqueConstraint('reviewer_id', 'reviewed_user_id', 'trade_id', 
+                          name='unique_review_per_trade')
+    )
+
+    @validates('rating')
+    def validate_rating(self, key, rating):
+        """Validate rating is between 1 and 5"""
+        if not 1 <= rating <= 5:
+            raise ValueError("Rating must be between 1 and 5")
+        return rating
+
+    @validates('reviewer_id')
+    def validate_reviewer(self, key, reviewer_id):
+        """Ensure reviewer is not reviewing themselves"""
+        if reviewer_id == self.reviewed_user_id:
+            raise ValueError("Users cannot review themselves")
+        return reviewer_id
+
+    def notify_reviewed_user(self):
+        """Create a notification for the reviewed user"""
+        reviewer = User.query.get(self.reviewer_id)
+        notification = Notification(
+            user_id=self.reviewed_user_id,
+            title="New Review Received",
+            message=f"{reviewer.username} has left you a {self.rating}-star review",
+            notification_type="review",
+            related_id=self.id
+        )
+        db.session.add(notification)
         db.session.commit() 
