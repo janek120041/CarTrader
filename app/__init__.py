@@ -7,12 +7,16 @@ from config import Config
 import os
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
+from flask_moment import Moment
+from flask_mail import Mail
 
 # Initialize Flask extensions
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 bootstrap = Bootstrap5()
+moment = Moment()
+mail = Mail()
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -23,6 +27,8 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     bootstrap.init_app(app)
+    moment.init_app(app)
+    mail.init_app(app)
     
     # Configure login
     login_manager.login_view = 'auth.login'
@@ -58,6 +64,9 @@ def create_app(config_class=Config):
     
     # Create static/img directory if it doesn't exist
     os.makedirs(os.path.join(app.root_path, 'static/img'), exist_ok=True)
+    
+    from app.context_processors import inject_datetime
+    app.context_processor(inject_datetime)
     
     if not app.debug and not app.testing:
         if app.config['MAIL_SERVER']:
