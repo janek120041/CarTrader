@@ -2,8 +2,7 @@ from flask import Blueprint, render_template, flash, redirect, url_for, request
 from flask_login import login_required, current_user
 from app import db
 from app.models import Car, TradeRequest
-
-bp = Blueprint('trades', __name__)
+from app.trades import bp
 
 @bp.route('/propose/<int:car_id>', methods=['POST'])
 @login_required
